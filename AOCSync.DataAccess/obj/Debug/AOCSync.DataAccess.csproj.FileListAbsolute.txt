@@ -1,5 +1,4 @@
 C:\Projects\AOCSync\AOCSync.DataAccess\bin\Debug\AocSync.DataAccess.dll
 C:\Projects\AOCSync\AOCSync.DataAccess\bin\Debug\AocSync.DataAccess.pdb
-C:\Projects\AOCSync\AOCSync.DataAccess\obj\Debug\AOCSync.DataAccess.csprojResolveAssemblyReference.cache
 C:\Projects\AOCSync\AOCSync.DataAccess\obj\Debug\AocSync.DataAccess.dll
 C:\Projects\AOCSync\AOCSync.DataAccess\obj\Debug\AocSync.DataAccess.pdb

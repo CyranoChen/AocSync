@@ -22,18 +22,27 @@ namespace AOCSync.Entity
             if (success)
             {
                 orgFlieName = string.Format("{0}\\{1}\\{2}.dat", "DAT", aocUserData.UserName, "wee_atc" + dateTime.ToString(TextTool.DATEFORMAT));
-                desFileName = string.Format("{0}\\{1}\\wee_atc.dat", "DAT", aocUserData.UserName);
+                //desFileName = string.Format("{0}\\{1}\\wee_atc.dat", "DAT", aocUserData.UserName);
 
-                if (File.Exists(desFileName))
+                //if (File.Exists(desFileName))
+                //{
+                //    File.Delete(desFileName);
+                //}
+                //File.Copy(orgFlieName, desFileName);
+
+                desFileName = string.Format("{0}\\{1}\\{2}\\wee_atc.dat", "DAT", aocUserData.UserName, dateTime.ToString(TextTool.DATEFORMAT));
+                String tempDir = string.Format("{0}\\{1}\\{2}", "DAT", aocUserData.UserName, dateTime.ToString(TextTool.DATEFORMAT));
+                if (!Directory.Exists(tempDir))
                 {
-                    File.Delete(desFileName);
+                    Directory.CreateDirectory(tempDir);
                 }
-                File.Copy(orgFlieName, desFileName);
-                msgSyncOut += string.Format("WorkFTPDAY write {0} Success\r\n", orgFlieName);
+                File.Move(orgFlieName, desFileName);
+
+                msgSyncOut = string.Format("WorkFTPDAY write {0} Success\r\n", orgFlieName);
 
                 if (!File.Exists(desFileName))
                 {
-                    msgSyncOut += string.Format("WorkFTPDAY no file {0}\r\n", desFileName);
+                    msgSyncOut = string.Format("WorkFTPDAY no file {0}\r\n", desFileName);
                     AOCLog.logErro(string.Format("WorkFTPDAY no file {0}", desFileName));
                 }
                 else
@@ -88,7 +97,10 @@ namespace AOCSync.Entity
                         }
                         ZipHelper.ZipFile(desFileName, desFileName + _fileType);
                     }
-
+                    aocUserData.loginfo.WriteLine(msgSyncOut);
+                     //add by march 20141211 为测试公安接口产生文件部分没问题而修改
+                    if (!aocUserData.UserName.Equals("GongAn01") && !aocUserData.UserName.Equals("MIS")){
+                    //add by march 20141211 为测试公安接口产生文件部分没问题而修改
                     success = FTPLogic(aocUserData, desFileName + _fileType, out msgSyncOut);
 
                     if (success)
@@ -100,6 +112,9 @@ namespace AOCSync.Entity
                     {
                         msgSyncOut += string.Format("WorkFTPDAY UPLOAD {0} Fail\r\n", desFileName + _fileType);
                     }
+                    //add by march 20141211 为测试公安接口产生文件部分没问题而修改
+                    }
+                    //add by march 20141211 为测试公安接口产生文件部分没问题而修改
                 }
 
                 //if (File.Exists(desFileName))
@@ -124,18 +139,27 @@ namespace AOCSync.Entity
             if (success)
             {
                 orgFlieName = string.Format("{0}\\{1}\\{2}{3}.dat", "DAT", aocUserData.UserName, "ats_atc", dateTime.ToString(TextTool.DATEFORMAT));
-                desFileName = string.Format("{0}\\{1}\\ats_atc.dat", "DAT", aocUserData.UserName);
-                if (File.Exists(desFileName))
+                
+                //desFileName = string.Format("{0}\\{1}\\ats_atc.dat", "DAT", aocUserData.UserName);
+                //if (File.Exists(desFileName))
+                //{
+                //    File.Delete(desFileName);
+                //}
+                //File.Copy(orgFlieName, desFileName);
+                desFileName = string.Format("{0}\\{1}\\{2}\\ats_atc.dat", "DAT", aocUserData.UserName, dateTime.ToString(TextTool.DATEFORMAT));
+                String tempDir = string.Format("{0}\\{1}\\{2}", "DAT", aocUserData.UserName, dateTime.ToString(TextTool.DATEFORMAT));
+                if (!Directory.Exists(tempDir))
                 {
-                    File.Delete(desFileName);
+                    Directory.CreateDirectory(tempDir);
                 }
-                File.Copy(orgFlieName, desFileName);
+                File.Move(orgFlieName, desFileName);
+                
 
-                msgSyncOut += string.Format("WorkFTPITV write {0} Success\r\n", orgFlieName);
+                msgSyncOut = string.Format("WorkFTPITV write {0} Success\r\n", orgFlieName);
 
                 if (!File.Exists(desFileName))
                 {
-                    msgSyncOut += string.Format("WorkFTPITV no file {0}\r\n", desFileName);
+                    msgSyncOut = string.Format("WorkFTPITV no file {0}\r\n", desFileName);
                     AOCLog.logErro(string.Format("WorkFTPITV no file {0}", desFileName));
                 }
                 else
@@ -151,6 +175,10 @@ namespace AOCSync.Entity
                         ZipHelper.ZipFile(desFileName, desFileName + _fileType);
                     }
                     aocUserData.loginfo.WriteLine(msgSyncOut);
+                    //add by march 20141211 为测试公安接口产生文件部分没问题而修改
+                    if (!aocUserData.UserName.Equals("GongAn01") && !aocUserData.UserName.Equals("MIS"))
+                    {
+                    //add by march 20141211 为测试公安接口产生文件部分没问题而修改
                     success = FTPLogic(aocUserData, desFileName + _fileType, out msgSyncOut);
 
                     if (success)
@@ -163,6 +191,9 @@ namespace AOCSync.Entity
                         msgSyncOut += string.Format("WorkFTPITV UPLOAD {0} Fail\r\n", desFileName + _fileType);
                     }
                     aocUserData.loginfo.WriteLine(msgSyncOut);
+                    //add by march 20141211 为测试公安接口产生文件部分没问题而修改
+                    }
+                    //add by march 20141211 为测试公安接口产生文件部分没问题而修改
                 }
 
                 //if (File.Exists(desFileName))

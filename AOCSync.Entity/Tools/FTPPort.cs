@@ -10,6 +10,10 @@ namespace AOCSync.Entity.Tools
      */
     public class FTPClientPort
     {
+        //add by march 20140408 记录FTP过程中的日志
+        public LogInfo loginfo;
+        //add by march 20140408 记录FTP过程中的日志
+
         private string FileName;
         //private string FilePath;
         private string UserName;
@@ -22,6 +26,10 @@ namespace AOCSync.Entity.Tools
         /************************************************/
         public FTPClientPort(string ftpsvr, string ftpport, string filename, string username, string password)
         {
+            //add by march 20140408 记录FTP过程中的日志
+            loginfo = new LogInfo(username + ".log");
+            //add by march 20140408 记录FTP过程中的日志
+
             ftpServerIP = ftpsvr;
             ftpPort = ftpport;
             if (string.IsNullOrEmpty(ftpPort))
@@ -81,83 +89,93 @@ namespace AOCSync.Entity.Tools
         public bool Upload(AOCUserData aocUserData)
         {
             DateTime DTstart = DateTime.Now;
-            //log.Info("+++++FTP Upload Begin At: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "+++++");
-
-            FileInfo fileInf = new FileInfo(this.FileName);
-            string _ftpRemoteDir;
-            if (!string.IsNullOrEmpty(aocUserData.FTPRemoteDir))
-            {
-                _ftpRemoteDir = aocUserData.FTPRemoteDir + "/";
-
-            }
-            else
-            {
-                //_ftpRemoteDir = aocUserData.UserName;
-                _ftpRemoteDir = "";
-            }
-            string uri = "ftp://" + this.ftpServerIP + ":" + this.ftpPort + "/" + _ftpRemoteDir  + fileInf.Name;
-
-            FtpWebRequest reqFTP;
-
-            // 根据uri创建FtpWebRequest对象 
-            reqFTP = (FtpWebRequest)FtpWebRequest.Create(new Uri("ftp://" + this.ftpServerIP + ":" + this.ftpPort + "/" + _ftpRemoteDir + "/" + fileInf.Name));
-
-            // 指定数据传输类型
-            reqFTP.UseBinary = true;
-
-            // ftp用户名和密码 
-            reqFTP.Credentials = new NetworkCredential(this.UserName, this.Password);
-
-            // 默认为true，连接不会被关闭 
-            // 在一个命令之后被执行 
-            reqFTP.KeepAlive = false;
-
-            // 指定执行什么命令 
-            reqFTP.Method = WebRequestMethods.Ftp.UploadFile;
-
-
-            // 上传文件时通知服务器文件的大小 
-            reqFTP.ContentLength = fileInf.Length;
-
-            // 缓冲大小设置为2kb 
-            int buffLength = 2048;
-
-            byte[] buff = new byte[buffLength];
-            int contentLen;
-
-            // 打开一个文件流 (System.IO.FileStream) 去读上传的文件 
-            FileStream fs = fileInf.OpenRead();
+            loginfo.WriteLine(string.Format("+++++FTP Upload Begin At: {0} +++++",DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")));
             try
             {
-                // 把上传的文件写入流 
-                Stream strm = reqFTP.GetRequestStream();
-
-                // 每次读文件流的2kb 
-                contentLen = fs.Read(buff, 0, buffLength);
-
-                // 流内容没有结束 
-                while (contentLen != 0)
+                FileInfo fileInf = new FileInfo(this.FileName);
+                string _ftpRemoteDir;
+                if (!string.IsNullOrEmpty(aocUserData.FTPRemoteDir))
                 {
-                    // 把内容从file stream 写入 upload stream 
-                    strm.Write(buff, 0, contentLen);
+                    _ftpRemoteDir = aocUserData.FTPRemoteDir + "/";
 
-                    contentLen = fs.Read(buff, 0, buffLength);
                 }
-                // 关闭两个流 
-                strm.Close();
-                fs.Close();
+                else
+                {
+                    //_ftpRemoteDir = aocUserData.UserName;
+                    _ftpRemoteDir = "";
+                }
+                string uri = "ftp://" + this.ftpServerIP + ":" + this.ftpPort + "/" + _ftpRemoteDir  + fileInf.Name;
 
-                //log.Info("+++++FTP Upload End At: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "+++++");
+                FtpWebRequest reqFTP;
+            
+                // 根据uri创建FtpWebRequest对象 
+                reqFTP = (FtpWebRequest)FtpWebRequest.Create(new Uri("ftp://" + this.ftpServerIP + ":" + this.ftpPort + "/" + _ftpRemoteDir  + fileInf.Name));
 
-                //TimeSpan TStemp = DateTime.Now.Subtract(DTstart);
-                //log.Info("+++++FTP Upload Cost:" + TStemp.TotalSeconds.ToString() + "s" + "+++++");
+                // 指定数据传输类型
+                reqFTP.UseBinary = true;
 
-                return true;
+                // ftp用户名和密码 
+                reqFTP.Credentials = new NetworkCredential(this.UserName, this.Password);
+
+                // 默认为true，连接不会被关闭 
+                // 在一个命令之后被执行 
+                reqFTP.KeepAlive = false;
+
+                // 指定执行什么命令 
+                reqFTP.Method = WebRequestMethods.Ftp.UploadFile;
+
+
+                // 上传文件时通知服务器文件的大小 
+                reqFTP.ContentLength = fileInf.Length;
+
+                // 缓冲大小设置为2kb 
+                int buffLength = 2048;
+
+                byte[] buff = new byte[buffLength];
+                int contentLen;
+
+                // 打开一个文件流 (System.IO.FileStream) 去读上传的文件 
+                FileStream fs = fileInf.OpenRead();
+                try
+                {
+                    // 把上传的文件写入流 
+                    Stream strm = reqFTP.GetRequestStream();
+
+                    // 每次读文件流的2kb 
+                    contentLen = fs.Read(buff, 0, buffLength);
+
+                    // 流内容没有结束 
+                    while (contentLen != 0)
+                    {
+                        // 把内容从file stream 写入 upload stream 
+                        strm.Write(buff, 0, contentLen);
+
+                        contentLen = fs.Read(buff, 0, buffLength);
+                    }
+                    // 关闭两个流 
+                    strm.Close();
+                    fs.Close();
+
+                    loginfo.WriteLine(string.Format("+++++FTP Upload End At: {0} +++++", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")));
+
+                    TimeSpan TStemp = DateTime.Now.Subtract(DTstart);
+                    loginfo.WriteLine(string.Format("+++++FTP Upload Cost:{0}s +++++", TStemp.TotalSeconds.ToString()));
+
+                    return true;
+                }
+                catch (System.Exception ex)
+                {
+                    loginfo.WriteLine(string.Format("+++++FTP upload Error {0}", ex.ToString()));
+                    return false;
+                }
             }
-            catch
+            catch (System.Exception ex)
             {
-                return false;
+                loginfo.WriteLine(string.Format("+++++FTP Error {0}",ex.ToString()));
             }
+            return false;
+           
+            
         }
 
 

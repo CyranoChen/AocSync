@@ -102,11 +102,12 @@ namespace AOCSync.Entity.Tools
                             throw ex;
 
                         }
+                        finally
+                        {
 
+                            StreamToZip.Close();
 
-
-                        StreamToZip.Close();
-
+                        }
                     }
 
 

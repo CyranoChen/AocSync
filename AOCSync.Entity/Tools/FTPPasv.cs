@@ -504,6 +504,7 @@ namespace AOCSync.Entity.Tools
                 {
                     // To do: setTimeout for unable connection or idle upload, quit the while clause
                     socketData.Send(buffer, iBytes, 0);
+                    loginfo.WriteLine("send " + iBytes + " totle " + input.Length);
                 }
 
                 input.Close();
@@ -712,10 +713,10 @@ namespace AOCSync.Entity.Tools
             {
                 s.Connect(ep);
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 //add by march 20140408 记录FTP过程中的日志
-                loginfo.WriteLine("Can't connect to remote server in CreateDataSocket()");
+                loginfo.WriteLine(string.Format("Can't connect to remote server in CreateDataSocket(), {0}",e.ToString()));
                 //add by march 20140408 记录FTP过程中的日志
                 throw new IOException("Can't connect to remote server");
             }
