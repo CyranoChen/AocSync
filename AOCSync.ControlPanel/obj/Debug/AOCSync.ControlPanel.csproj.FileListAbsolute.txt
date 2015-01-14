@@ -1,0 +1,16 @@
+C:\Projects\AOCSync\AOCSync.ControlPanel\obj\Debug\AOCSync.ControlPanel.csprojResolveAssemblyReference.cache
+C:\Projects\AOCSync\AOCSync.ControlPanel\obj\Debug\AOCSync.ControlPanel.AOCSyncTestForm.resources
+C:\Projects\AOCSync\AOCSync.ControlPanel\obj\Debug\AOCSync.ControlPanel.AOCUserDetailForm.resources
+C:\Projects\AOCSync\AOCSync.ControlPanel\obj\Debug\AOCSync.ControlPanel.AOCUserForm.resources
+C:\Projects\AOCSync\AOCSync.ControlPanel\obj\Debug\AOCSync.ControlPanel.Properties.Resources.resources
+C:\Projects\AOCSync\AOCSync.ControlPanel\obj\Debug\AOCSync.ControlPanel.csproj.GenerateResource.Cache
+C:\Projects\AOCSync\AOCSync.ControlPanel\bin\Debug\AOCSync.ControlPanel.exe.config
+C:\Projects\AOCSync\AOCSync.ControlPanel\bin\Debug\AOCSync.ControlPanel.exe
+C:\Projects\AOCSync\AOCSync.ControlPanel\bin\Debug\AOCSync.ControlPanel.pdb
+C:\Projects\AOCSync\AOCSync.ControlPanel\bin\Debug\AOCSync.Entity.dll
+C:\Projects\AOCSync\AOCSync.ControlPanel\bin\Debug\ICSharpCode.SharpZipLib.dll
+C:\Projects\AOCSync\AOCSync.ControlPanel\bin\Debug\AocSync.DataAccess.dll
+C:\Projects\AOCSync\AOCSync.ControlPanel\bin\Debug\AOCSync.Entity.pdb
+C:\Projects\AOCSync\AOCSync.ControlPanel\bin\Debug\AocSync.DataAccess.pdb
+C:\Projects\AOCSync\AOCSync.ControlPanel\obj\Debug\AOCSync.ControlPanel.exe
+C:\Projects\AOCSync\AOCSync.ControlPanel\obj\Debug\AOCSync.ControlPanel.pdb

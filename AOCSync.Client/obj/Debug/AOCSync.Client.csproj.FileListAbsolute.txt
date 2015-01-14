@@ -1,0 +1,11 @@
+C:\Projects\AOCSync\AOCSync.Client\bin\Debug\AOCSync.Client.exe.config
+C:\Projects\AOCSync\AOCSync.Client\bin\Debug\AOCSync.Client.exe
+C:\Projects\AOCSync\AOCSync.Client\bin\Debug\AOCSync.Client.pdb
+C:\Projects\AOCSync\AOCSync.Client\bin\Debug\AOCSync.Entity.dll
+C:\Projects\AOCSync\AOCSync.Client\bin\Debug\ICSharpCode.SharpZipLib.dll
+C:\Projects\AOCSync\AOCSync.Client\bin\Debug\AocSync.DataAccess.dll
+C:\Projects\AOCSync\AOCSync.Client\bin\Debug\AOCSync.Entity.pdb
+C:\Projects\AOCSync\AOCSync.Client\bin\Debug\AocSync.DataAccess.pdb
+C:\Projects\AOCSync\AOCSync.Client\obj\Debug\AOCSync.Client.csprojResolveAssemblyReference.cache
+C:\Projects\AOCSync\AOCSync.Client\obj\Debug\AOCSync.Client.exe
+C:\Projects\AOCSync\AOCSync.Client\obj\Debug\AOCSync.Client.pdb

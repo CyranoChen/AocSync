@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{7F2CC5A0-A978-4C45-89DF-0926DDB158E5}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>AOCSync.Entity</RootNamespace>
+    <AssemblyName>AOCSync.Entity</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>2.0</OldToolsVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="ICSharpCode.SharpZipLib">
+      <HintPath>..\packages\ICSharpCode.SharpZipLib.dll.0.85.4.369\lib\net20\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AOC\AOCDataFQSHIS.cs" />
+    <Compile Include="AOC\AOCCTRLData.cs" />
+    <Compile Include="AOC\AOCDataCC.cs" />
+    <Compile Include="AOC\AOCDataCCHIS.cs" />
+    <Compile Include="AOC\AOCLog.cs" />
+    <Compile Include="AOC\AOCUserData.cs" />
+    <Compile Include="AOC\AOCDataFQS.cs" />
+    <Compile Include="AOC\AOCCONBINE.cs" />
+    <Compile Include="BusinessLogic\BLCallCenterSyncTOAOC.cs" />
+    <Compile Include="BusinessLogic\BLFlightQuerySystemSyncTOAOC.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="BusinessLogic\BLMoveToHIS.cs" />
+    <Compile Include="BusinessLogic\BLOutput.cs" />
+    <Compile Include="CallCenter\CallCenterData.cs" />
+    <Compile Include="Config\AOCConfig.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Enum\EnumAOCSync.cs" />
+    <Compile Include="FlightQuerySystem\FlightQuerySystemData.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tools\DataFileTool.cs" />
+    <Compile Include="Tools\FileMakerTool.cs" />
+    <Compile Include="Tools\FTPPasv.cs" />
+    <Compile Include="Tools\FTPPort.cs" />
+    <Compile Include="Tools\LogInfo.cs" />
+    <Compile Include="Tools\TextTool.cs" />
+    <Compile Include="Tools\ZipHelper.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AocSync.DataAccess\AOCSync.DataAccess.csproj">
+      <Project>{B00160CF-2207-4EFB-A13D-527C3C2F419F}</Project>
+      <Name>AOCSync.DataAccess</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
