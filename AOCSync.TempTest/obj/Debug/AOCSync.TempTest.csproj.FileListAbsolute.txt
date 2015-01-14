@@ -3,3 +3,4 @@ C:\Projects\AOCSync\AOCSync.TempTest\bin\AOCSync.TempTest.dll
 C:\Projects\AOCSync\AOCSync.TempTest\bin\AOCSync.TempTest.pdb
 C:\Projects\AOCSync\AOCSync.TempTest\obj\Debug\AOCSync.TempTest.dll
 C:\Projects\AOCSync\AOCSync.TempTest\obj\Debug\AOCSync.TempTest.pdb
+C:\Projects\AOCSync\AOCSync.TempTest\obj\Debug\AOCSync.TempTest.csprojResolveAssemblyReference.cache
