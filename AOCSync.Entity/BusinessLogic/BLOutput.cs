@@ -99,7 +99,7 @@ namespace AOCSync.Entity
                     }
                     aocUserData.loginfo.WriteLine(msgSyncOut);
                      //add by march 20141211 为测试公安接口产生文件部分没问题而修改
-                    if (!aocUserData.UserName.Equals("GongAn01") && !aocUserData.UserName.Equals("MIS")){
+                    //if (!aocUserData.UserName.Equals("GongAn01") && !aocUserData.UserName.Equals("MIS")){
                     //add by march 20141211 为测试公安接口产生文件部分没问题而修改
                     success = FTPLogic(aocUserData, desFileName + _fileType, out msgSyncOut);
 
@@ -113,7 +113,7 @@ namespace AOCSync.Entity
                         msgSyncOut += string.Format("WorkFTPDAY UPLOAD {0} Fail\r\n", desFileName + _fileType);
                     }
                     //add by march 20141211 为测试公安接口产生文件部分没问题而修改
-                    }
+                    //}
                     //add by march 20141211 为测试公安接口产生文件部分没问题而修改
                 }
 
@@ -176,8 +176,8 @@ namespace AOCSync.Entity
                     }
                     aocUserData.loginfo.WriteLine(msgSyncOut);
                     //add by march 20141211 为测试公安接口产生文件部分没问题而修改
-                    if (!aocUserData.UserName.Equals("GongAn01") && !aocUserData.UserName.Equals("MIS"))
-                    {
+                    //if (!aocUserData.UserName.Equals("GongAn01") && !aocUserData.UserName.Equals("MIS"))
+                    //{
                     //add by march 20141211 为测试公安接口产生文件部分没问题而修改
                     success = FTPLogic(aocUserData, desFileName + _fileType, out msgSyncOut);
 
@@ -192,7 +192,7 @@ namespace AOCSync.Entity
                     }
                     aocUserData.loginfo.WriteLine(msgSyncOut);
                     //add by march 20141211 为测试公安接口产生文件部分没问题而修改
-                    }
+                    //}
                     //add by march 20141211 为测试公安接口产生文件部分没问题而修改
                 }
 
@@ -225,8 +225,8 @@ namespace AOCSync.Entity
                         _ftpRemoteDir = "/";
                     }
                     FTPClientPasv ftpclient = new FTPClientPasv(aocUserData.FTPIP, aocUserData.FTPPort, filePath, aocUserData.FTPLogName, aocUserData.FTPPassword, _ftpRemoteDir);
-                    ftpclient.SetTransferType(FTPClientPasv.TransferType.Binary);
-                    msgSyncOut = ftpclient.MsgSyncOut;
+                    //ftpclient.SetTransferType(FTPClientPasv.TransferType.Binary);
+                    //msgSyncOut = ftpclient.MsgSyncOut;
                     ret = ftpclient.Put(filePath);
                 }
                 else

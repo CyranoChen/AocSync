@@ -14,8 +14,8 @@ namespace AOCSync.Client
             if (state is DateTime)
             {
                 Lock.FQS = false;
-                dateTime = (DateTime)state;
-                //dateTime = DateTime.Parse("2013-07-21");
+                dateTime = (DateTime)state;//2013-07-21
+                //dateTime = DateTime.Parse("2017-01-10");
                 Console.WriteLine(string.Format("WorkFlightQuerySystemITV start:{0}", DateTime.Now.ToString()));
                 //BLFlightQuerySystemSyncTOAOC.SyncFlightQuerySystemToAOCFQSITV(dateTime, out msgOut);
                 BLFlightQuerySystemSyncTOAOC.SyncFlightQuerySystemToAOCFQSSimpleITV(dateTime, out msgOut);

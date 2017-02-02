@@ -72,7 +72,7 @@ namespace AOCSync.ControlPanel
 
         private void InitDGVAOCUser()
         {
-            List<AOCUserData> aocUserDataList = AOCUserData.GetAOCUserDatas();
+            List<AOCUserData> aocUserDataList = AOCUserData.GetAOCUserDatasAll();
 
             dgvAOCUser.DataSource = aocUserDataList;
             dgvAOCUser.ClearSelection();

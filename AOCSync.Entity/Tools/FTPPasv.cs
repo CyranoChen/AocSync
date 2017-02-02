@@ -1,797 +1,1397 @@
-ï»¿using System;
+using System;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Collections;
 
 namespace AOCSync.Entity.Tools
 {
     /// <summary>
-    /// FTPClient çš„æ‘˜è¦è¯´æ˜ã€‚
+    /// FTPÀà
     /// </summary>
     public class FTPClientPasv
     {
-        //add by march 20140408 è®°å½•FTPè¿‡ç¨‹ä¸­çš„æ—¥å¿—
+        #region ±äÁ¿ÉùÃ÷
+
+        //add by march 20140408 ¼ÇÂ¼FTP¹ı³ÌÖĞµÄÈÕÖ¾
         public LogInfo loginfo;
-        //add by march 20140408 è®°å½•FTPè¿‡ç¨‹ä¸­çš„æ—¥å¿—
+        //add by march 20140408 ¼ÇÂ¼FTP¹ı³ÌÖĞµÄÈÕÖ¾
 
-        public FTPClientPasv(string ftpsvr, string ftpport, string filename, string username, string password, string filedir)
+        /// <summary>
+        /// ·şÎñÆ÷Á¬½ÓµØÖ·
+        /// </summary>
+        public string server;
+
+        /// <summary>
+        /// µÇÂ½ÕÊºÅ
+        /// </summary>
+        public string user;
+
+        /// <summary>
+        /// µÇÂ½¿ÚÁî
+        /// </summary>
+        public string pass;
+
+        /// <summary>
+        /// ¶Ë¿ÚºÅ
+        /// </summary>
+        public int port;
+
+        /// <summary>
+        /// ÎŞÏìÓ¦Ê±¼ä£¨FTPÔÚÖ¸¶¨Ê±¼äÄÚÎŞÏìÓ¦£©
+        /// </summary>
+        public int timeout;
+
+        /// <summary>
+        /// ·şÎñÆ÷´íÎó×´Ì¬ĞÅÏ¢
+        /// </summary>
+        public string errormessage;
+
+  
+        /// <summary>
+        /// ·şÎñÆ÷×´Ì¬·µ»ØĞÅÏ¢
+        /// </summary>
+        private string messages;
+
+        /// <summary>
+        /// ·şÎñÆ÷µÄÏìÓ¦ĞÅÏ¢
+        /// </summary>
+        private string responseStr;
+
+        /// <summary>
+        /// Á´½ÓÄ£Ê½£¨Ö÷¶¯»ò±»¶¯£¬Ä¬ÈÏÎª±»¶¯£©
+        /// </summary>
+        private bool passive_mode;        
+
+        /// <summary>
+        /// ÉÏ´«»òÏÂÔØĞÅÏ¢×Ö½ÚÊı
+        /// </summary>
+        private long bytes_total;
+
+        /// <summary>
+        /// ÉÏ´«»òÏÂÔØµÄÎÄ¼ş´óĞ¡
+        /// </summary>
+        private long file_size;
+
+        /// <summary>
+        /// Ö÷Ì×½Ó×Ö
+        /// </summary>
+        private Socket main_sock;
+
+        /// <summary>
+        /// ÒªÁ´½ÓµÄÍøÂçµØÖ·ÖÕ½áµã
+        /// </summary>
+        private IPEndPoint main_ipEndPoint;
+
+        /// <summary>
+        /// ÕìÌıÌ×½Ó×Ö
+        /// </summary>
+        private Socket listening_sock;
+
+        /// <summary>
+        /// Êı¾İÌ×½Ó×Ö
+        /// </summary>
+        private Socket data_sock;
+
+        /// <summary>
+        /// ÒªÁ´½ÓµÄÍøÂçÊı¾İµØÖ·ÖÕ½áµã
+        /// </summary>
+        private IPEndPoint data_ipEndPoint;
+
+        /// <summary>
+        /// ÓÃÓÚÉÏ´«»òÏÂÔØµÄÎÄ¼şÁ÷¶ÔÏó
+        /// </summary>
+        private FileStream file;
+
+        /// <summary>
+        /// ÓëFTP·şÎñÆ÷½»»¥µÄ×´Ì¬Öµ
+        /// </summary>
+        private int response;
+
+        /// <summary>
+        /// ¶ÁÈ¡²¢±£´æµ±Ç°ÃüÁîÖ´ĞĞºó´ÓFTP·şÎñÆ÷¶Ë·µ»ØµÄÊı¾İĞÅÏ¢
+        /// </summary>
+        private string bucket;
+
+        private string filePath;
+        private string strRemotePath ;
+        #endregion
+
+        #region ¹¹Ôìº¯Êı
+        public FTPClientPasv(string server, string port, string filePath, string user, string pass, string filedir)
         {
-            RemoteUser = username;
-            if (string.IsNullOrEmpty(RemoteUser))
-                RemoteUser = "anonymous";
-            RemotePass = password;
-            if (string.IsNullOrEmpty(RemotePass))
-                RemotePass = "anonymous";
-            //add by march 20140408 è®°å½•FTPè¿‡ç¨‹ä¸­çš„æ—¥å¿—
-            loginfo = new LogInfo(RemoteUser + ".log");
-            //add by march 20140408 è®°å½•FTPè¿‡ç¨‹ä¸­çš„æ—¥å¿—
-            RemoteHost = ftpsvr;
-            if (string.IsNullOrEmpty(ftpport))
+            this.filePath = filePath;
+            this.server = server;
+            this.user = user;
+            //add by march 20140408 ¼ÇÂ¼FTP¹ı³ÌÖĞµÄÈÕÖ¾
+            loginfo = new LogInfo(user + ".log");
+            //add by march 20140408 ¼ÇÂ¼FTP¹ı³ÌÖĞµÄÈÕÖ¾
+            this.pass = pass;
+            if (string.IsNullOrEmpty(port))
             {
-                ftpport = "21";
+                this.port = 21;
             }
-            RemotePort = int.Parse(ftpport);
-            if (RemotePort <= 0)
-                RemotePort = 21;
+            else 
+            { 
+                this.port = int.Parse(port); 
+            }
+            
+            
+            passive_mode = true;
+            main_sock = null;
+            main_ipEndPoint = null;
+            listening_sock = null;
+            data_sock = null;
+            data_ipEndPoint = null;
+            file = null;
+            bucket = "";
+            bytes_total = 0;
+            timeout = 10000;    //ÎŞÏìÓ¦Ê±¼äÎª10Ãë
+            messages = "";
+            errormessage = "";
+            this.strRemotePath = "";
+            if (string.IsNullOrEmpty(filedir))
+            {
+                this.strRemotePath = "/";
+            }
+            else
+            {
+                this.strRemotePath = filedir;
+            }
+        }
+        
+        #endregion
 
-            RemotePath = filedir;
-            if (string.IsNullOrEmpty(RemotePath))
-                RemotePath = "/";
+        #region ÊôĞÔ
+        /// <summary>
+        /// µ±Ç°ÊÇ·ñÒÑÁ¬½Ó
+        /// </summary>
+        public bool IsConnected
+        {
+            get
+            {
+                if (main_sock != null)
+                    return main_sock.Connected;
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// µ±message»º³åÇøÓĞÊı¾İÔò·µ»Ø
+        /// </summary>
+        public bool MessagesAvailable
+        {
+            get
+            {
+                if (messages.Length > 0)
+                    return true;
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// »ñÈ¡·şÎñÆ÷×´Ì¬·µ»ØĞÅÏ¢, ²¢Çå¿Õmessages±äÁ¿
+        /// </summary>
+        public string Messages
+        {
+            get
+            {
+                string tmp = messages;
+                messages = "";
+                return tmp;
+            }
+        }
+        /// <summary>
+        /// ×îĞÂÖ¸Áî·¢³öºó·şÎñÆ÷µÄÏìÓ¦
+        /// </summary>
+        public string ResponseString
+        {
+            get
+            {
+                return responseStr;
+            }
+        }
+
+
+        /// <summary>
+        ///ÔÚÒ»´Î´«ÊäÖĞ,·¢ËÍ»ò½ÓÊÕµÄ×Ö½ÚÊı
+        /// </summary>
+        public long BytesTotal
+        {
+            get
+            {
+                return bytes_total;
+            }
+        }
+
+        /// <summary>
+        ///±»ÏÂÔØ»òÉÏ´«µÄÎÄ¼ş´óĞ¡,µ±ÎÄ¼ş´óĞ¡ÎŞĞ§Ê±Îª0
+        /// </summary>
+        public long FileSize
+        {
+            get
+            {
+                return file_size;
+            }
+        }
+
+        /// <summary>
+        /// Á´½ÓÄ£Ê½:
+        /// true ±»¶¯Ä£Ê½ [Ä¬ÈÏ]
+        /// false: Ö÷¶¯Ä£Ê½
+        /// </summary>
+        public bool PassiveMode
+        {
+            get
+            {
+                return passive_mode;
+            }
+            set
+            {
+                passive_mode = value;
+            }
+        }
+
+        #endregion
+
+        #region ²Ù×÷
+
+        /// <summary>
+        /// ²Ù×÷Ê§°Ü
+        /// </summary>
+        private void Fail()
+        {
+            Disconnect();
+            errormessage += responseStr;
+            loginfo.WriteLine(errormessage);
+            throw new Exception(responseStr);
+        }
+
+        /// <summary>
+        /// ÏÂÔØÎÄ¼şÀàĞÍ
+        /// </summary>
+        /// <param name="mode">true:¶ş½øÖÆÎÄ¼ş false:×Ö·ûÎÄ¼ş</param>
+        private void SetBinaryMode(bool mode)
+        {
+            if (mode)
+                SendCommand("TYPE I");
+            else
+                SendCommand("TYPE A");
+
+            ReadResponse();
+            if (response != 200)
+                Fail();
+        }
+
+        /// <summary>
+        /// ·¢ËÍÃüÁî
+        /// </summary>
+        /// <param name="command"></param>
+        private void SendCommand(string command)
+        {
+            Byte[] cmd = Encoding.ASCII.GetBytes((command + "\r\n").ToCharArray());
+
+            if (command.Length > 3 && command.Substring(0, 4) == "PASS")
+            {
+                messages = "\rPASS xxx";
+            }
+            else
+            {
+                messages = "\r" + command;
+            }
+
+            try
+            {
+                main_sock.Send(cmd, cmd.Length, 0);
+                loginfo.WriteLine(command);
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    Disconnect();
+                    errormessage += ex.Message;
+                    return;
+                }
+                catch
+                {
+                    main_sock.Close();
+                    file.Close();
+                    main_sock = null;
+                    main_ipEndPoint = null;
+                    file = null;
+                }
+            }
+        }
+
+
+        private void FillBucket()
+        {
+            Byte[] bytes = new Byte[512];
+            long bytesgot;
+            int msecs_passed = 0;
+
+            while (main_sock.Available < 1)
+            {
+                System.Threading.Thread.Sleep(50);
+                msecs_passed += 50;
+                //µ±µÈ´ıÊ±¼äµ½,Ôò¶Ï¿ªÁ´½Ó
+                if (msecs_passed > timeout)
+                {
+                    Disconnect();
+                    errormessage += "Timed out waiting on server to respond.";
+                    throw new Exception("Timed out waiting on server to respond.");
+                    //return;
+                }
+            }
+
+            while (main_sock.Available > 0)
+            {
+                bytesgot = main_sock.Receive(bytes, 512, 0);
+                bucket += Encoding.ASCII.GetString(bytes, 0, (int)bytesgot);
+                System.Threading.Thread.Sleep(50);
+            }
+        }
+
+
+        private string GetLineFromBucket()
+        {
+            int i;
+            string buf = "";
+
+            if ((i = bucket.IndexOf('\n')) < 0)
+            {
+                while (i < 0)
+                {
+                    FillBucket();
+                    i = bucket.IndexOf('\n');
+                }
+            }
+
+            buf = bucket.Substring(0, i);
+            bucket = bucket.Substring(i + 1);
+
+            return buf;
+        }
+
+
+        /// <summary>
+        /// ·µ»Ø·şÎñÆ÷¶Ë·µ»ØĞÅÏ¢
+        /// </summary>
+        private void ReadResponse()
+        {
+            string buf;
+            messages = "";
+
+            while (true)
+            {
+                buf = GetLineFromBucket();
+
+                if (Regex.Match(buf, "^[0-9]+ ").Success)
+                {
+                    responseStr = buf;
+                    response = int.Parse(buf.Substring(0, 3));
+                    break;
+                }
+                else
+                    messages += Regex.Replace(buf, "^[0-9]+-", "") + "\n";
+            }
+            loginfo.WriteLine(buf);
+        }
+
+
+        /// <summary>
+        /// ´ò¿ªÊı¾İÌ×½Ó×Ö
+        /// </summary>
+        private void OpenDataSocket()
+        {
+            if (passive_mode)
+            {
+                string[] pasv;
+                string server;
+                int port;
+
+                Connect();
+                SendCommand("PASV");
+                ReadResponse();
+                if (response != 227)
+                    Fail();
+
+                try
+                {
+                    int i1, i2;
+
+                    i1 = responseStr.IndexOf('(') + 1;
+                    i2 = responseStr.IndexOf(')') - i1;
+                    pasv = responseStr.Substring(i1, i2).Split(',');
+                }
+                catch (Exception)
+                {
+                    Disconnect();
+                    errormessage += "Malformed PASV response: " + responseStr;
+                    return ;
+                }
+
+                if (pasv.Length < 6)
+                {
+                    Disconnect();
+                    errormessage += "Malformed PASV response: " + responseStr;
+                    return ;
+                }
+
+                server = String.Format("{0}.{1}.{2}.{3}", pasv[0], pasv[1], pasv[2], pasv[3]);
+                port = (int.Parse(pasv[4]) << 8) + int.Parse(pasv[5]);
+
+                try
+                {
+                    CloseDataSocket();
+
+                    data_sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                    data_ipEndPoint = new IPEndPoint(IPAddress.Parse(server), port);
+
+                    data_sock.Connect(data_ipEndPoint);
+
+                }
+                catch (Exception ex)
+                {
+                    errormessage += "Failed to connect for data transfer: " + ex.Message;
+                    throw new Exception( "Failed to connect for data transfer: " + ex.Message);
+                    //return ;
+                }
+            }
+            else
+            {
+                Connect();
+
+                try
+                {
+                    CloseDataSocket();
+
+                    listening_sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+                    // ¶ÔÓÚ¶Ë¿Ú,Ôò·¢ËÍIPµØÖ·.ÏÂÃæÔòÌáÈ¡ÏàÓ¦ĞÅÏ¢
+                    string sLocAddr = main_sock.LocalEndPoint.ToString();
+                    int ix = sLocAddr.IndexOf(':');
+                    if (ix < 0)
+                    {
+                        errormessage += "Failed to parse the local address: " + sLocAddr;
+                        return;
+                    }
+                    string sIPAddr = sLocAddr.Substring(0, ix);
+                    // ÏµÍ³×Ô¶¯°ó¶¨Ò»¸ö¶Ë¿ÚºÅ(ÉèÖÃ port = 0)
+                    System.Net.IPEndPoint localEP = new IPEndPoint(IPAddress.Parse(sIPAddr), 0);
+
+                    listening_sock.Bind(localEP);
+                    sLocAddr = listening_sock.LocalEndPoint.ToString();
+                    ix = sLocAddr.IndexOf(':');
+                    if (ix < 0)
+                    {
+                        errormessage += "Failed to parse the local address: " + sLocAddr;
+
+                    }
+                    int nPort = int.Parse(sLocAddr.Substring(ix + 1));
+
+                    // ¿ªÊ¼ÕìÌıÁ´½ÓÇëÇó
+                    listening_sock.Listen(1);
+                    string sPortCmd = string.Format("PORT {0},{1},{2}",
+                                                    sIPAddr.Replace('.', ','),
+                                                    nPort / 256, nPort % 256);
+                    SendCommand(sPortCmd);
+                    ReadResponse();
+                    if (response != 200)
+                        Fail();
+                }
+                catch (Exception ex)
+                {
+                    errormessage += "Failed to connect for data transfer: " + ex.Message;
+                    throw new Exception( "Failed to connect for data transfer: " + ex.Message);
+                    //return;
+                }
+            }
+        }
+
+
+        private void ConnectDataSocket()
+        {
+            if (data_sock != null)        // ÒÑÁ´½Ó
+                return;
+
+            try
+            {
+                data_sock = listening_sock.Accept();    // Accept is blocking
+                listening_sock.Close();
+                listening_sock = null;
+
+                if (data_sock == null)
+                {
+                    throw new Exception("Winsock error: " +
+                        Convert.ToString(System.Runtime.InteropServices.Marshal.GetLastWin32Error()));
+                }
+            }
+            catch (Exception ex)
+            {
+                errormessage += "Failed to connect for data transfer: " + ex.Message;
+                throw new Exception("Failed to connect for data transfer: " + ex.Message);
+            }
+        }
+
+
+        private void CloseDataSocket()
+        {
+            if (data_sock != null)
+            {
+                if (data_sock.Connected)
+                {
+                    data_sock.Close();
+                }
+                data_sock = null;
+            }
+
+            data_ipEndPoint = null;
+        }
+
+        /// <summary>
+        /// ¹Ø±ÕËùÓĞÁ´½Ó
+        /// </summary>
+        public void Disconnect()
+        {
+            CloseDataSocket();
+
+            if (main_sock != null)
+            {
+                if (main_sock.Connected)
+                {
+                    SendCommand("QUIT");
+                    main_sock.Close();
+                }
+                main_sock = null;
+            }
+
+            if (file != null)
+                file.Close();
+
+            main_ipEndPoint = null;
+            file = null;
+        }
+
+        /// <summary>
+        /// Á´½Óµ½FTP·şÎñÆ÷
+        /// </summary>
+        /// <param name="server">ÒªÁ´½ÓµÄIPµØÖ·»òÖ÷»úÃû</param>
+        /// <param name="port">¶Ë¿ÚºÅ</param>
+        /// <param name="user">µÇÂ½ÕÊºÅ</param>
+        /// <param name="pass">µÇÂ½¿ÚÁî</param>
+        public void Connect(string server, int port, string user, string pass)
+        {
+            this.server = server;
+            this.user = user;
+            this.pass = pass;
+            this.port = port;
+
             Connect();
-
-
-            //Put(filename);
-        }
-
-        #region æ„é€ å‡½æ•°
-        /// <summary>
-        /// ç¼ºçœæ„é€ å‡½æ•°
-        /// </summary>
-        public FTPClientPasv()
-        {
-            strRemoteHost = "";
-            strRemotePath = "";
-            strRemoteUser = "";
-            strRemotePass = "";
-            strRemotePort = 21;
-            bConnected = false;
-        }   /// <summary>
-        /// æ„é€ å‡½æ•°
-        /// </summary>
-        /// <param name="remoteHost"></param>
-        /// <param name="remotePath"></param>
-        /// <param name="remoteUser"></param>
-        /// <param name="remotePass"></param>
-        /// <param name="remotePort"></param>
-        //public FTPClientPasv(string remoteHost, string remotePath, string remoteUser, string remotePass, int remotePort)
-        //{
-        //    strRemoteHost = remoteHost;
-        //    strRemotePath = remotePath;
-        //    strRemoteUser = remoteUser;
-        //    strRemotePass = remotePass;
-        //    strRemotePort = remotePort;
-        //    Connect();
-        //}
-        #endregion
-
-        #region ç™»é™†
-
-        private string msgSyncOut;
-
-        public string MsgSyncOut
-        {
-            get { return msgSyncOut; }
-            set { msgSyncOut = value; }
         }
 
         /// <summary>
-        /// FTPæœåŠ¡å™¨IPåœ°å€
+        /// Á´½Óµ½FTP·şÎñÆ÷
         /// </summary>
-        private string strRemoteHost;
-        public string RemoteHost
+        /// <param name="server">ÒªÁ´½ÓµÄIPµØÖ·»òÖ÷»úÃû</param>
+        /// <param name="user">µÇÂ½ÕÊºÅ</param>
+        /// <param name="pass">µÇÂ½¿ÚÁî</param>
+        public void Connect(string server, string user, string pass)
         {
-            get
-            {
-                return strRemoteHost;
-            }
-            set
-            {
-                strRemoteHost = value;
-            }
-        }
-        /// <summary>
-        /// FTPæœåŠ¡å™¨ç«¯å£
-        /// </summary>
-        private int strRemotePort;
-        public int RemotePort
-        {
-            get
-            {
-                return strRemotePort;
-            }
-            set
-            {
-                strRemotePort = value;
-            }
-        }
-        /// <summary>
-        /// å½“å‰æœåŠ¡å™¨ç›®å½•
-        /// </summary>
-        private string strRemotePath;
-        public string RemotePath
-        {
-            get
-            {
-                return strRemotePath;
-            }
-            set
-            {
-                strRemotePath = value;
-            }
-        }
-        /// <summary>
-        /// ç™»å½•ç”¨æˆ·è´¦å·
-        /// </summary>
-        private string strRemoteUser;
-        public string RemoteUser
-        {
-            get
-            {
-                return strRemoteUser;
-            }
-            set
-            {
-                strRemoteUser = value;
-            }
-        }
-        /// <summary>
-        /// ç”¨æˆ·ç™»å½•å¯†ç 
-        /// </summary>
-        private string strRemotePass;
-        public string RemotePass
-        {
-            get
-            {
-                return strRemotePass;
-            }
-            set
-            {
-                strRemotePass = value;
-            }
-        }   /// <summary>
-        /// æ˜¯å¦ç™»å½•
-        /// </summary>
-        private Boolean bConnected;
-        public bool Connected
-        {
-            get
-            {
-                return bConnected;
-            }
-        }
-        #endregion
+            this.server = server;
+            this.user = user;
+            this.pass = pass;
 
-        #region é“¾æ¥
+            Connect();
+        }
 
         /// <summary>
-        /// å»ºç«‹è¿æ¥ 
+        /// Á´½Óµ½FTP·şÎñÆ÷
         /// </summary>
         public void Connect()
         {
-            socketControl = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            IPEndPoint ep = new IPEndPoint(IPAddress.Parse(RemoteHost), strRemotePort);
-            // é“¾æ¥
+            if (server == null)
+            {
+                errormessage += "No server has been set.\r\n";
+            }
+            if (user == null)
+            {
+                errormessage += "No server has been set.\r\n";
+            }
+
+            if (main_sock != null)
+                if (main_sock.Connected)
+                    return;
+
             try
             {
-                socketControl.Connect(ep);
-                socketControl.Blocking = true;//è®¾ç½®é˜»å¡æ¨¡å¼
-                socketControl.ReceiveTimeout = 50000;//è®¾ç½®æ¥æ”¶è¶…æ—¶50S
-                socketControl.SendTimeout = 50000;//è®¾ç½®å‘é€è¶…æ—¶50S
+//                main_sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+//#if NET1
+//                main_ipEndPoint = new IPEndPoint(Dns.GetHostByName(server).AddressList[0], port);
+//#else
+//                main_ipEndPoint = new IPEndPoint(System.Net.Dns.GetHostEntry(server).AddressList[0], port);
+//#endif
+                main_sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                main_ipEndPoint = new IPEndPoint(IPAddress.Parse(server), port);
+
+                main_sock.Connect(main_ipEndPoint);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                //add by march 20140408 è®°å½•FTPè¿‡ç¨‹ä¸­çš„æ—¥å¿—
-                loginfo.WriteLine(String.Format("Couldn't connect to {0}", RemoteHost));
-                //add by march 20140408 è®°å½•FTPè¿‡ç¨‹ä¸­çš„æ—¥å¿—
+                errormessage += ex.Message;
+                //add by march 20140408 ¼ÇÂ¼FTP¹ı³ÌÖĞµÄÈÕÖ¾
+                loginfo.WriteLine(String.Format("Couldn't connect to {0},{1}", server, ex.Message));
+                //add by march 20140408 ¼ÇÂ¼FTP¹ı³ÌÖĞµÄÈÕÖ¾
                 throw new IOException("Couldn't connect to remote server");
+                //return false;
             }
-            //add by march 20140408 è®°å½•FTPè¿‡ç¨‹ä¸­çš„æ—¥å¿—
-            loginfo.WriteLine(String.Format("connect to {0} OK",RemoteHost));
-            //add by march 20140408 è®°å½•FTPè¿‡ç¨‹ä¸­çš„æ—¥å¿—
 
-            // è·å–åº”ç­”ç 
-            ReadReply();
-            if (iReplyCode != 220)
+            ReadResponse();
+            if (response != 220)
+                Fail();
+
+            SendCommand("USER " + user);
+            ReadResponse();
+
+            switch (response)
             {
-                DisConnect();
-                throw new IOException(strReply.Substring(4));
-            }    // ç™»é™†
-            SendCommand("USER " + strRemoteUser);
-            if (!(iReplyCode == 331 || iReplyCode == 230))
-            {
-                CloseSocketConnect();//å…³é—­è¿æ¥
-                throw new IOException(strReply.Substring(4));
+                case 331:
+                    if (pass == null)
+                    {
+                        Disconnect();
+                        errormessage += "No password has been set.";
+                        throw new IOException("No password has been set.");
+                        //return false;
+                    }
+                    SendCommand("PASS " + pass);
+                    ReadResponse();
+                    if (response != 230)
+                    {
+                        Fail();
+                        //return false;
+                    }
+                    break;
+                case 230:
+                    break;
             }
-            if (iReplyCode != 230)
-            {
-                SendCommand("PASS " + strRemotePass);
-                if (!(iReplyCode == 230 || iReplyCode == 202))
-                {
-                    CloseSocketConnect();//å…³é—­è¿æ¥
-                    throw new IOException(strReply.Substring(4));
-                }
-            }
-            bConnected = true;    // åˆ‡æ¢åˆ°ç›®å½•
-            ChDir(strRemotePath);
-        }
-        /// <summary>
-        /// å…³é—­è¿æ¥
-        /// </summary>
-        public void DisConnect()
-        {
-            if (socketControl != null)
-            {
-                SendCommand("QUIT");
-            }
-            CloseSocketConnect();
+
+            //return true;
         }
 
-        #endregion
-
-        #region ä¼ è¾“æ¨¡å¼
         /// <summary>
-        /// ä¼ è¾“æ¨¡å¼:äºŒè¿›åˆ¶ç±»å‹ã€ASCIIç±»å‹
+        /// »ñÈ¡FTPµ±Ç°(¹¤×÷)Ä¿Â¼ÏÂµÄÎÄ¼şÁĞ±í
         /// </summary>
-        public enum TransferType { Binary, ASCII };   /// <summary>
-        /// è®¾ç½®ä¼ è¾“æ¨¡å¼
-        /// </summary>
-        /// <param name="ttType">ä¼ è¾“æ¨¡å¼</param>
-        public void SetTransferType(TransferType ttType)
+        /// <returns>·µ»ØÎÄ¼şÁĞ±íÊı×é</returns>
+        public ArrayList List()
         {
-            if (ttType == TransferType.Binary)
-            {
-                SendCommand("TYPE I");//binaryç±»å‹ä¼ è¾“
-            }
-            else
-            {
-                SendCommand("TYPE A");//ASCIIç±»å‹ä¼ è¾“
-            }
-            if (iReplyCode != 200)
-            {
-                throw new IOException(strReply.Substring(4));
-            }
-            else
-            {
-                trType = ttType;
-            }
-        }
-        /// <summary>
-        /// è·å¾—ä¼ è¾“æ¨¡å¼
-        /// </summary>
-        /// <returns>ä¼ è¾“æ¨¡å¼</returns>
-        public TransferType GetTransferType()
-        {
-            return trType;
-        }
+            Byte[] bytes = new Byte[512];
+            string file_list = "";
+            long bytesgot = 0;
+            int msecs_passed = 0;
+            ArrayList list = new ArrayList();
 
-        #endregion
+            Connect();
+            OpenDataSocket();
+            SendCommand("LIST");
+            ReadResponse();
 
-        #region æ–‡ä»¶æ“ä½œ
-        /// <summary>
-        /// è·å¾—æ–‡ä»¶åˆ—è¡¨
-        /// </summary>
-        /// <param name="strMask">æ–‡ä»¶åçš„åŒ¹é…å­—ç¬¦ä¸²</param>
-        /// <returns></returns>
-        public string[] Dir(string strMask)
-        {
-            // å»ºç«‹é“¾æ¥
-            if (!bConnected)
+            switch (response)
             {
-                Connect();
-            }    //å»ºç«‹è¿›è¡Œæ•°æ®è¿æ¥çš„socket
-            Socket socketData = CreateDataSocket();
+                case 125:
+                case 150:
+                    break;
+                default:
+                    CloseDataSocket();
+                    throw new Exception(responseStr);
+            }
+            ConnectDataSocket();
 
-            //ä¼ é€å‘½ä»¤
-            SendCommand("NLST " + strMask);    //åˆ†æåº”ç­”ä»£ç 
-            if (!(iReplyCode == 150 || iReplyCode == 125 || iReplyCode == 226))
+            while (data_sock.Available < 1)
             {
-                throw new IOException(strReply.Substring(4));
-            }    //è·å¾—ç»“æœ
-            strMsg = "";
-            while (true)
-            {
-                int iBytes = socketData.Receive(buffer, buffer.Length, 0);
-                strMsg += ASCII.GetString(buffer, 0, iBytes);
-                if (iBytes < buffer.Length)
+                System.Threading.Thread.Sleep(50);
+                msecs_passed += 50;
+
+                if (msecs_passed > (timeout / 10))
                 {
                     break;
                 }
             }
-            char[] seperator = { '\n' };
-            string[] strsFileList = strMsg.Split(seperator);
-            socketData.Close();//æ•°æ®socketå…³é—­æ—¶ä¹Ÿä¼šæœ‰è¿”å›ç 
-            if (iReplyCode != 226)
+
+            while (data_sock.Available > 0)
             {
-                ReadReply();
-                if (iReplyCode != 226)
+                bytesgot = data_sock.Receive(bytes, bytes.Length, 0);
+                file_list += Encoding.ASCII.GetString(bytes, 0, (int)bytesgot);
+                System.Threading.Thread.Sleep(50);
+            }
+
+            CloseDataSocket();
+
+            ReadResponse();
+            if (response != 226)
+                throw new Exception(responseStr);
+
+            foreach (string f in file_list.Split('\n'))
+            {
+                if (f.Length > 0 && !Regex.Match(f, "^total").Success)
+                    list.Add(f.Substring(0, f.Length - 1));
+            }
+
+            return list;
+        }
+
+        /// <summary>
+        /// »ñÈ¡µ½ÎÄ¼şÃûÁĞ±í
+        /// </summary>
+        /// <returns>·µ»ØÎÄ¼şÃûÁĞ±í</returns>
+        public ArrayList ListFiles()
+        {
+            ArrayList list = new ArrayList();
+
+            foreach (string f in List())
+            {
+                if ((f.Length > 0))
                 {
-                    throw new IOException(strReply.Substring(4));
+                    if ((f[0] != 'd') && (f.ToUpper().IndexOf("<DIR>") < 0))
+                        list.Add(f);
                 }
             }
-            return strsFileList;
-        }
-        /// <summary>
-        /// è·å–æ–‡ä»¶å¤§å°
-        /// </summary>
-        /// <param name="strFileName">æ–‡ä»¶å</param>
-        /// <returns>æ–‡ä»¶å¤§å°</returns>
-        private long GetFileSize(string strFileName)
-        {
-            if (!bConnected)
-            {
-                Connect();
-            }
-            SendCommand("SIZE " + Path.GetFileName(strFileName));
-            long lSize = 0;
-            if (iReplyCode == 213)
-            {
-                lSize = Int64.Parse(strReply.Substring(4));
-            }
-            else
-            {
-                throw new IOException(strReply.Substring(4));
-            }
-            return lSize;
-        }
-        /// <summary>
-        /// åˆ é™¤
-        /// </summary>
-        /// <param name="strFileName">å¾…åˆ é™¤æ–‡ä»¶å</param>
-        public void Delete(string strFileName)
-        {
-            if (!bConnected)
-            {
-                Connect();
-            }
-            SendCommand("DELE " + strFileName);
-            if (iReplyCode != 250)
-            {
-                throw new IOException(strReply.Substring(4));
-            }
-        }
-        /// <summary>
-        /// é‡å‘½å(å¦‚æœæ–°æ–‡ä»¶åä¸å·²æœ‰æ–‡ä»¶é‡å,å°†è¦†ç›–å·²æœ‰æ–‡ä»¶)
-        /// </summary>
-        /// <param name="strOldFileName">æ—§æ–‡ä»¶å</param>
-        /// <param name="strNewFileName">æ–°æ–‡ä»¶å</param>
-        public void Rename(string strOldFileName, string strNewFileName)
-        {
-            if (!bConnected)
-            {
-                Connect();
-            }
-            SendCommand("RNFR " + strOldFileName);
-            if (iReplyCode != 350)
-            {
-                throw new IOException(strReply.Substring(4));
-            }
-            // å¦‚æœæ–°æ–‡ä»¶åä¸åŸæœ‰æ–‡ä»¶é‡å,å°†è¦†ç›–åŸæœ‰æ–‡ä»¶
-            SendCommand("RNTO " + strNewFileName);
-            if (iReplyCode != 250)
-            {
-                throw new IOException(strReply.Substring(4));
-            }
-        }
-        #endregion
 
-        #region ä¸Šä¼ å’Œä¸‹è½½
+            return list;
+        }
 
         /// <summary>
-        /// ä¸‹è½½ä¸€æ‰¹æ–‡ä»¶
+        /// »ñÈ¡Â·¾¶ÁĞ±í
         /// </summary>
-        /// <param name="strFileNameMask">æ–‡ä»¶åçš„åŒ¹é…å­—ç¬¦ä¸²</param>
-        /// <param name="strFolder">æœ¬åœ°ç›®å½•(ä¸å¾—ä»¥\ç»“æŸ)</param>
-        public void Get(string strFileNameMask, string strFolder)
+        /// <returns>·µ»ØÂ·¾¶ÁĞ±í</returns>
+        public ArrayList ListDirectories()
         {
-            if (!bConnected)
+            ArrayList list = new ArrayList();
+
+            foreach (string f in List())
             {
-                Connect();
-            }
-            string[] strFiles = Dir(strFileNameMask);
-            foreach (string strFile in strFiles)
-            {
-                if (!strFile.Equals(""))//ä¸€èˆ¬æ¥è¯´strFilesçš„æœ€åä¸€ä¸ªå…ƒç´ å¯èƒ½æ˜¯ç©ºå­—ç¬¦ä¸²
+                if (f.Length > 0)
                 {
-                    Get(strFile, strFolder, strFile);
+                    if ((f[0] == 'd') || (f.ToUpper().IndexOf("<DIR>") >= 0))
+                        list.Add(f);
                 }
             }
+
+            return list;
         }
+
         /// <summary>
-        /// ä¸‹è½½ä¸€ä¸ªæ–‡ä»¶
+        /// »ñÈ¡Ô­Ê¼Êı¾İĞÅÏ¢.
         /// </summary>
-        /// <param name="strRemoteFileName">è¦ä¸‹è½½çš„æ–‡ä»¶å</param>
-        /// <param name="strFolder">æœ¬åœ°ç›®å½•(ä¸å¾—ä»¥\ç»“æŸ)</param>
-        /// <param name="strLocalFileName">ä¿å­˜åœ¨æœ¬åœ°æ—¶çš„æ–‡ä»¶å</param>
-        public void Get(string strRemoteFileName, string strFolder, string strLocalFileName)
+        /// <param name="fileName">Ô¶³ÌÎÄ¼şÃû</param>
+        /// <returns>·µ»ØÔ­Ê¼Êı¾İĞÅÏ¢.</returns>
+        public string GetFileDateRaw(string fileName)
         {
-            if (!bConnected)
+            Connect();
+
+            SendCommand("MDTM " + fileName);
+            ReadResponse();
+            if (response != 213)
             {
-                Connect();
+                errormessage += responseStr;
+                return "";
             }
-            SetTransferType(TransferType.Binary);
-            if (strLocalFileName.Equals(""))
-            {
-                strLocalFileName = strRemoteFileName;
-            }
-            if (!File.Exists(strLocalFileName))
-            {
-                Stream st = File.Create(strLocalFileName);
-                st.Close();
-            }
-            FileStream output = new
-             FileStream(strFolder + "\\" + strLocalFileName, FileMode.Create);
-            Socket socketData = CreateDataSocket();
-            SendCommand("RETR " + strRemoteFileName);
-            if (!(iReplyCode == 150 || iReplyCode == 125
-             || iReplyCode == 226 || iReplyCode == 250))
-            {
-                throw new IOException(strReply.Substring(4));
-            }
-            while (true)
-            {
-                int iBytes = socketData.Receive(buffer, buffer.Length, 0);
-                output.Write(buffer, 0, iBytes);
-                if (iBytes <= 0)
-                {
-                    break;
-                }
-            }
-            output.Close();
-            if (socketData.Connected)
-            {
-                socketData.Close();
-            }
-            if (!(iReplyCode == 226 || iReplyCode == 250))
-            {
-                ReadReply();
-                if (!(iReplyCode == 226 || iReplyCode == 250))
-                {
-                    throw new IOException(strReply.Substring(4));
-                }
-            }
+
+            return (this.responseStr.Substring(4));
         }
+
         /// <summary>
-        /// ä¸Šä¼ ä¸€æ‰¹æ–‡ä»¶
+        /// µÃµ½ÎÄ¼şÈÕÆÚ.
         /// </summary>
-        /// <param name="strFolder">æœ¬åœ°ç›®å½•(ä¸å¾—ä»¥\ç»“æŸ)</param>
-        /// <param name="strFileNameMask">æ–‡ä»¶ååŒ¹é…å­—ç¬¦(å¯ä»¥åŒ…å«*å’Œ?)</param>
-        public void Put(string strFolder, string strFileNameMask)
+        /// <param name="fileName">Ô¶³ÌÎÄ¼şÃû</param>
+        /// <returns>·µ»ØÔ¶³ÌÎÄ¼şÈÕÆÚ</returns>
+        public DateTime GetFileDate(string fileName)
         {
-            string[] strFiles = Directory.GetFiles(strFolder, strFileNameMask);
-            foreach (string strFile in strFiles)
-            {
-                //strFileæ˜¯å®Œæ•´çš„æ–‡ä»¶å(åŒ…å«è·¯å¾„)
-                Put(strFile);
-            }
+            return ConvertFTPDateToDateTime(GetFileDateRaw(fileName));
         }
-        /// <summary>
-        /// ä¸Šä¼ ä¸€ä¸ªæ–‡ä»¶
-        /// </summary>
-        /// <param name="strFileName">æœ¬åœ°æ–‡ä»¶å</param>
-        public bool Put(string strFileName)
+
+        private DateTime ConvertFTPDateToDateTime(string input)
         {
+            if (input.Length < 14)
+                throw new ArgumentException("Input Value for ConvertFTPDateToDateTime method was too short.");
 
-            if (!bConnected)
+            //YYYYMMDDhhmmss":
+            int year = Convert.ToInt16(input.Substring(0, 4));
+            int month = Convert.ToInt16(input.Substring(4, 2));
+            int day = Convert.ToInt16(input.Substring(6, 2));
+            int hour = Convert.ToInt16(input.Substring(8, 2));
+            int min = Convert.ToInt16(input.Substring(10, 2));
+            int sec = Convert.ToInt16(input.Substring(12, 2));
+
+            return new DateTime(year, month, day, hour, min, sec);
+        }
+
+        /// <summary>
+        /// »ñÈ¡FTPÉÏµÄµ±Ç°(¹¤×÷)Â·¾¶
+        /// </summary>
+        /// <returns>·µ»ØFTPÉÏµÄµ±Ç°(¹¤×÷)Â·¾¶</returns>
+        public string GetWorkingDirectory()
+        {
+            //PWD - ÏÔÊ¾¹¤×÷Â·¾¶
+            Connect();
+            SendCommand("PWD");
+            ReadResponse();
+
+            if (response != 257)
             {
-                Connect();
+                errormessage += responseStr;
             }
 
-            Socket socketData = CreateDataSocket();
-            SendCommand("STOR " + Path.GetFileName(strFileName));
-
-            if (!(iReplyCode == 125 || iReplyCode == 150))
-            {
-                throw new IOException(strReply.Substring(4));
-            }
-
-            FileStream input = new
-             FileStream(strFileName, FileMode.Open);
-            int iBytes = 0;
+            string pwd;
             try
             {
-                while ((iBytes = input.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    // To do: setTimeout for unable connection or idle upload, quit the while clause
-                    socketData.Send(buffer, iBytes, 0);
-                    loginfo.WriteLine("send " + iBytes + " totle " + input.Length);
-                }
-
-                input.Close();
-
-                if (socketData.Connected)
-                {
-                    socketData.Close();
-                }
-
-                if (!(iReplyCode == 226 || iReplyCode == 250))
-                {
-                    ReadReply();
-                    if (!(iReplyCode == 226 || iReplyCode == 250))
-                    {
-                        throw new IOException(strReply.Substring(4));
-                    }
-                }
+                pwd = responseStr.Substring(responseStr.IndexOf("\"", 0) + 1);//5);
+                pwd = pwd.Substring(0, pwd.LastIndexOf("\""));
+                pwd = pwd.Replace("\"\"", "\""); // Ìæ»»´øÒıºÅµÄÂ·¾¶ĞÅÏ¢·ûºÅ
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                input.Close();
+                errormessage += ex.Message;
+                return null;
+            }
 
-                if (socketData.Connected)
-                {
-                    socketData.Close();
-                }
-                //add by march 20140408 è®°å½•FTPè¿‡ç¨‹ä¸­çš„æ—¥å¿—
-                loginfo.WriteLine(e.Message);
-                //add by march 20140408 è®°å½•FTPè¿‡ç¨‹ä¸­çš„æ—¥å¿—
-                throw new IOException(e.Message);
+            return pwd;
+        }
+
+
+        /// <summary>
+        /// Ìø×ª·şÎñÆ÷ÉÏµÄµ±Ç°(¹¤×÷)Â·¾¶
+        /// </summary>
+        /// <param name="path">ÒªÌø×ªµÄÂ·¾¶</param>
+        public bool ChangeDir(string path)
+        {
+            Connect();
+            SendCommand("CWD " + path);
+            ReadResponse();
+            if (response != 250)
+            {
+                errormessage += responseStr;
+                loginfo.WriteLine(errormessage);
+                //throw new IOException("responseStr");
+                return false;
             }
             return true;
         }
 
-        #endregion
-
-
-        #region ç›®å½•æ“ä½œ
         /// <summary>
-        /// åˆ›å»ºç›®å½•
+        /// ´´½¨Ö¸¶¨µÄÄ¿Â¼
         /// </summary>
-        /// <param name="strDirName">ç›®å½•å</param>
-        public void MkDir(string strDirName)
+        /// <param name="dir">Òª´´½¨µÄÄ¿Â¼</param>
+        public void MakeDir(string dir)
         {
-            if (!bConnected)
+            Connect();
+            SendCommand("MKD " + dir);
+            ReadResponse();
+
+            switch (response)
             {
-                Connect();
-            }
-            SendCommand("MKD " + strDirName);
-            if (iReplyCode != 257)
-            {
-                throw new IOException(strReply.Substring(4));
-            }
-        }
-
-
-        /// <summary>
-        /// åˆ é™¤ç›®å½•
-        /// </summary>
-        /// <param name="strDirName">ç›®å½•å</param>
-        public void RmDir(string strDirName)
-        {
-            if (!bConnected)
-            {
-                Connect();
-            }
-            SendCommand("RMD " + strDirName);
-            if (iReplyCode != 250)
-            {
-                throw new IOException(strReply.Substring(4));
-            }
-        }
-
-
-        /// <summary>
-        /// æ”¹å˜ç›®å½•
-        /// </summary>
-        /// <param name="strDirName">æ–°çš„å·¥ä½œç›®å½•å</param>
-        public void ChDir(string strDirName)
-        {
-            try
-            {
-                if (strDirName.Equals(".") || strDirName.Equals(""))
-                {
-                    return;
-                }
-                if (!bConnected)
-                {
-                    Connect();
-                }
-                SendCommand("CWD " + strDirName);
-                if (iReplyCode != 250)
-                {
-                    throw new IOException(strReply.Substring(4));
-                }
-                this.strRemotePath = strDirName;
-            }
-            catch (Exception ex)
-            {
-                MsgSyncOut = ex.Message + "ä¸Šä¼ æœªæˆåŠŸ\r\n";
-
-            }
-        }
-
-        #endregion
-
-        #region å†…éƒ¨å˜é‡
-        /// <summary>
-        /// æœåŠ¡å™¨è¿”å›çš„åº”ç­”ä¿¡æ¯(åŒ…å«åº”ç­”ç )
-        /// </summary>
-        private string strMsg;
-        /// <summary>
-        /// æœåŠ¡å™¨è¿”å›çš„åº”ç­”ä¿¡æ¯(åŒ…å«åº”ç­”ç )
-        /// </summary>
-        private string strReply;
-        /// <summary>
-        /// æœåŠ¡å™¨è¿”å›çš„åº”ç­”ç 
-        /// </summary>
-        private int iReplyCode;
-        /// <summary>
-        /// è¿›è¡Œæ§åˆ¶è¿æ¥çš„socket
-        /// </summary>
-        private Socket socketControl;
-        /// <summary>
-        /// ä¼ è¾“æ¨¡å¼
-        /// </summary>
-        private TransferType trType;
-        /// <summary>
-        /// æ¥æ”¶å’Œå‘é€æ•°æ®çš„ç¼“å†²åŒº
-        /// </summary>
-        private static int BLOCK_SIZE = 512;
-        Byte[] buffer = new Byte[BLOCK_SIZE];
-        /// <summary>
-        /// ç¼–ç æ–¹å¼
-        /// </summary>
-        Encoding ASCII = Encoding.ASCII;
-        #endregion   #region å†…éƒ¨å‡½æ•°
-
-        /// <summary>
-        /// å°†ä¸€è¡Œåº”ç­”å­—ç¬¦ä¸²è®°å½•åœ¨strReplyå’ŒstrMsg
-        /// åº”ç­”ç è®°å½•åœ¨iReplyCode
-        /// </summary>
-        private void ReadReply()
-        {
-            strMsg = "";
-            strReply = ReadLine();
-            iReplyCode = Int32.Parse(strReply.Substring(0, 3));
-        }
-        /// <summary>
-        /// å»ºç«‹è¿›è¡Œæ•°æ®è¿æ¥çš„socket
-        /// </summary>
-        /// <returns>æ•°æ®è¿æ¥socket</returns>
-        private Socket CreateDataSocket()
-        {
-            SendCommand("PASV");
-            if (iReplyCode != 227)
-            {
-                throw new IOException(strReply.Substring(4));
-            }
-            int index1 = strReply.IndexOf('(');
-            int index2 = strReply.IndexOf(')');
-            string ipData =
-             strReply.Substring(index1 + 1, index2 - index1 - 1);
-            int[] parts = new int[6];
-            int len = ipData.Length;
-            int partCount = 0;
-            string buf = "";
-            for (int i = 0; i < len && partCount <= 6; i++)
-            {
-                char ch = Char.Parse(ipData.Substring(i, 1));
-                if (Char.IsDigit(ch))
-                    buf += ch;
-                else if (ch != ',')
-                {
-                    //add by march 20140408 è®°å½•FTPè¿‡ç¨‹ä¸­çš„æ—¥å¿—
-                    loginfo.WriteLine("Malformed PASV strReply: " +  strReply);
-                    //add by march 20140408 è®°å½•FTPè¿‡ç¨‹ä¸­çš„æ—¥å¿—
-                    throw new IOException("Malformed PASV strReply: " +
-                     strReply);
-                }
-                if (ch == ',' || i + 1 == len)
-                {
-                    try
-                    {
-                        parts[partCount++] = Int32.Parse(buf);
-                        buf = "";
-                    }
-                    catch (Exception)
-                    {
-                        //add by march 20140408 è®°å½•FTPè¿‡ç¨‹ä¸­çš„æ—¥å¿—
-                        loginfo.WriteLine("Malformed PASV strReply: " + strReply);
-                        //add by march 20140408 è®°å½•FTPè¿‡ç¨‹ä¸­çš„æ—¥å¿—
-                        throw new IOException("Malformed PASV strReply: " +
-                         strReply);
-                    }
-                }
-            }
-            string ipAddress = parts[0] + "." + parts[1] + "." +
-             parts[2] + "." + parts[3];
-            int port = (parts[4] << 8) + parts[5];
-            Socket s = new
-             Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            IPEndPoint ep = new
-             IPEndPoint(IPAddress.Parse(ipAddress), port);
-            try
-            {
-                s.Connect(ep);
-            }
-            catch (Exception e)
-            {
-                //add by march 20140408 è®°å½•FTPè¿‡ç¨‹ä¸­çš„æ—¥å¿—
-                loginfo.WriteLine(string.Format("Can't connect to remote server in CreateDataSocket(), {0}",e.ToString()));
-                //add by march 20140408 è®°å½•FTPè¿‡ç¨‹ä¸­çš„æ—¥å¿—
-                throw new IOException("Can't connect to remote server");
-            }
-            return s;
-        }
-
-
-        /// <summary>
-        /// å…³é—­socketè¿æ¥(ç”¨äºç™»å½•ä»¥å‰)
-        /// </summary>
-        private void CloseSocketConnect()
-        {
-            if (socketControl != null)
-            {
-                socketControl.Close();
-                socketControl = null;
-            }
-            bConnected = false;
-        }
-
-        /// <summary>
-        /// è¯»å–Socketè¿”å›çš„æ‰€æœ‰å­—ç¬¦ä¸²
-        /// </summary>
-        /// <returns>åŒ…å«åº”ç­”ç çš„å­—ç¬¦ä¸²è¡Œ</returns>
-        private string ReadLine()
-        {
-
-
-            while (true)
-            {
-                int iBytes = socketControl.Receive(buffer, buffer.Length, 0);
-                strMsg += ASCII.GetString(buffer, 0, iBytes);
-                if (iBytes < buffer.Length)
-                {
+                case 257:
+                case 250:
                     break;
-                }
+                default:
+                    {
+                        errormessage += responseStr;
+                        break;
+                    }
             }
+        }
 
-
-            char[] seperator = { '\n' };
-            string[] mess = strMsg.Split(seperator);
-            if (strMsg.Length > 2)
+        /// <summary>
+        /// ÒÆ³ıFTPÉÏµÄÖ¸¶¨Ä¿Â¼
+        /// </summary>
+        /// <param name="dir">ÒªÒÆ³ıµÄÄ¿Â¼</param>
+        public void RemoveDir(string dir)
+        {
+            Connect();
+            SendCommand("RMD " + dir);
+            ReadResponse();
+            if (response != 250)
             {
-                strMsg = mess[mess.Length - 2];
-                //seperator[0]æ˜¯10,æ¢è¡Œç¬¦æ˜¯ç”±13å’Œ0ç»„æˆçš„,åˆ†éš”å10åé¢è™½æ²¡æœ‰å­—ç¬¦ä¸²,
-                //ä½†ä¹Ÿä¼šåˆ†é…ä¸ºç©ºå­—ç¬¦ä¸²ç»™åé¢(ä¹Ÿæ˜¯æœ€åä¸€ä¸ª)å­—ç¬¦ä¸²æ•°ç»„,
-                //æ‰€ä»¥æœ€åä¸€ä¸ªmessæ˜¯æ²¡ç”¨çš„ç©ºå­—ç¬¦ä¸²
-                //ä½†ä¸ºä»€ä¹ˆä¸ç›´æ¥å–mess[0],å› ä¸ºåªæœ‰æœ€åä¸€è¡Œå­—ç¬¦ä¸²åº”ç­”ç ä¸ä¿¡æ¯ä¹‹é—´æœ‰ç©ºæ ¼
+                errormessage += responseStr;
+                return; ;
+            }
+        }
+
+        /// <summary>
+        /// ÒÆ³ıFTPÉÏµÄÖ¸¶¨ÎÄ¼ş
+        /// </summary>
+        /// <param name="filename">ÒªÒÆ³ıµÄÎÄ¼şÃû³Æ</param>
+        public void RemoveFile(string filename)
+        {
+            Connect();
+            SendCommand("DELE " + filename);
+            ReadResponse();
+            if (response != 250)
+            {
+                errormessage += responseStr;
+            }
+        }
+
+        /// <summary>
+        /// ÖØÃüÃûFTPÉÏµÄÎÄ¼ş
+        /// </summary>
+        /// <param name="oldfilename">Ô­ÎÄ¼şÃû</param>
+        /// <param name="newfilename">ĞÂÎÄ¼şÃû</param>
+        public void RenameFile(string oldfilename, string newfilename)
+        {
+            Connect();
+            SendCommand("RNFR " + oldfilename);
+            ReadResponse();
+            if (response != 350)
+            {
+                errormessage += responseStr;
             }
             else
             {
-                strMsg = mess[0];
+                SendCommand("RNTO " + newfilename);
+                ReadResponse();
+                if (response != 250)
+                {
+                    errormessage += responseStr;
+                }
             }
-            if (!strMsg.Substring(3, 1).Equals(" "))//è¿”å›å­—ç¬¦ä¸²æ­£ç¡®çš„æ˜¯ä»¥åº”ç­”ç (å¦‚220å¼€å¤´,åé¢æ¥ä¸€ç©ºæ ¼,å†æ¥é—®å€™å­—ç¬¦ä¸²)
-            {
-                return ReadLine();
-            }
-            //add by march 20140408 è®°å½•FTPè¿‡ç¨‹ä¸­çš„æ—¥å¿—
-            loginfo.WriteLine(strMsg);
-            //add by march 20140408 è®°å½•FTPè¿‡ç¨‹ä¸­çš„æ—¥å¿—
-            return strMsg;
         }
+
         /// <summary>
-        /// å‘é€å‘½ä»¤å¹¶è·å–åº”ç­”ç å’Œæœ€åä¸€è¡Œåº”ç­”å­—ç¬¦ä¸²
+        /// »ñµÃÖ¸¶¨ÎÄ¼şµÄ´óĞ¡(Èç¹ûFTPÖ§³Ö)
         /// </summary>
-        /// <param name="strCommand">å‘½ä»¤</param>
-        private void SendCommand(String strCommand)
+        /// <param name="filename">Ö¸¶¨µÄÎÄ¼ş</param>
+        /// <returns>·µ»ØÖ¸¶¨ÎÄ¼şµÄ´óĞ¡</returns>
+        public long GetFileSize(string filename)
         {
-            Byte[] cmdBytes =
-             Encoding.ASCII.GetBytes((strCommand + "\r\n").ToCharArray());
-            socketControl.Send(cmdBytes, cmdBytes.Length, 0);
-            //add by march 20140408 è®°å½•FTPè¿‡ç¨‹ä¸­çš„æ—¥å¿—
-            loginfo.WriteLine(strCommand);
-            //add by march 20140408 è®°å½•FTPè¿‡ç¨‹ä¸­çš„æ—¥å¿—
-            ReadReply();
+            Connect();
+            SendCommand("SIZE " + filename);
+            ReadResponse();
+            if (response != 213)
+            {
+                errormessage += responseStr;
+            }
+
+            return Int64.Parse(responseStr.Substring(4));
         }
+
+        /// <summary>
+        /// ÉÏ´«Ö¸¶¨µÄÎÄ¼ş
+        /// </summary>
+        /// <param name="filename">ÒªÉÏ´«µÄÎÄ¼ş</param>
+        public bool OpenUpload(string filename)
+        {
+            return OpenUpload(filename, filename, false);
+        }
+
+        /// <summary>
+        /// ÉÏ´«Ö¸¶¨µÄÎÄ¼ş
+        /// </summary>
+        /// <param name="filename">±¾µØÎÄ¼şÃû</param>
+        /// <param name="remotefilename">Ô¶³ÌÒª¸²¸ÇµÄÎÄ¼şÃû</param>
+        public bool OpenUpload(string filename, string remotefilename)
+        {
+            return OpenUpload(filename, remotefilename, false);
+        }
+
+        /// <summary>
+        /// ÉÏ´«Ö¸¶¨µÄÎÄ¼ş
+        /// </summary>
+        /// <param name="filename">±¾µØÎÄ¼şÃû</param>
+        /// <param name="resume">Èç¹û´æÔÚ,Ôò³¢ÊÔ»Ö¸´</param>
+        public bool OpenUpload(string filename, bool resume)
+        {
+            return OpenUpload(filename, filename, resume);
+        }
+
+        /// <summary>
+        /// ÉÏ´«Ö¸¶¨µÄÎÄ¼ş
+        /// </summary>
+        /// <param name="filename">±¾µØÎÄ¼şÃû</param>
+        /// <param name="remote_filename">Ô¶³ÌÒª¸²¸ÇµÄÎÄ¼şÃû</param>
+        /// <param name="resume">Èç¹û´æÔÚ,Ôò³¢ÊÔ»Ö¸´</param>
+        public bool OpenUpload(string filename, string remote_filename, bool resume)
+        {
+            Connect();
+            SetBinaryMode(true);
+            OpenDataSocket();
+
+            bytes_total = 0;
+
+            try
+            {
+                file = new FileStream(filename, FileMode.Open);
+            }
+            catch (Exception ex)
+            {
+                file = null;
+                errormessage += ex.Message;
+                return false;
+            }
+
+            file_size = file.Length;
+
+            if (resume)
+            {
+                long size = GetFileSize(remote_filename);
+                SendCommand("REST " + size);
+                ReadResponse();
+                if (response == 350)
+                    file.Seek(size, SeekOrigin.Begin);
+            }
+
+            SendCommand("STOR " + remote_filename);
+            ReadResponse();
+
+            switch (response)
+            {
+                case 125:
+                case 150:
+                    break;
+                default:
+                    file.Close();
+                    file = null;
+                    errormessage += responseStr;
+                    return false;
+            }
+            ConnectDataSocket();
+
+            return true;
+        }
+
+        /// <summary>
+        /// ÏÂÔØÖ¸¶¨ÎÄ¼ş
+        /// </summary>
+        /// <param name="filename">Ô¶³ÌÎÄ¼şÃû³Æ</param>
+        public void OpenDownload(string filename)
+        {
+            OpenDownload(filename, filename, false);
+        }
+
+        /// <summary>
+        /// ÏÂÔØ²¢»Ö¸´Ö¸¶¨ÎÄ¼ş
+        /// </summary>
+        /// <param name="filename">Ô¶³ÌÎÄ¼şÃû³Æ</param>
+        /// <param name="resume">ÈçÎÄ¼ş´æÔÚ,Ôò³¢ÊÔ»Ö¸´</param>
+        public void OpenDownload(string filename, bool resume)
+        {
+            OpenDownload(filename, filename, resume);
+        }
+
+        /// <summary>
+        /// ÏÂÔØÖ¸¶¨ÎÄ¼ş
+        /// </summary>
+        /// <param name="filename">Ô¶³ÌÎÄ¼şÃû³Æ</param>
+        /// <param name="localfilename">±¾µØÎÄ¼şÃû</param>
+        public void OpenDownload(string remote_filename, string localfilename)
+        {
+            OpenDownload(remote_filename, localfilename, false);
+        }
+
+        /// <summary>
+        /// ´ò¿ª²¢ÏÂÔØÎÄ¼ş
+        /// </summary>
+        /// <param name="remote_filename">Ô¶³ÌÎÄ¼şÃû³Æ</param>
+        /// <param name="local_filename">±¾µØÎÄ¼şÃû</param>
+        /// <param name="resume">Èç¹ûÎÄ¼ş´æÔÚÔò»Ö¸´</param>
+        public void OpenDownload(string remote_filename, string local_filename, bool resume)
+        {
+            Connect();
+            SetBinaryMode(true);
+
+            bytes_total = 0;
+
+            try
+            {
+                file_size = GetFileSize(remote_filename);
+            }
+            catch
+            {
+                file_size = 0;
+            }
+
+            if (resume && File.Exists(local_filename))
+            {
+                try
+                {
+                    file = new FileStream(local_filename, FileMode.Open);
+                }
+                catch (Exception ex)
+                {
+                    file = null;
+                    throw new Exception(ex.Message);
+                }
+
+                SendCommand("REST " + file.Length);
+                ReadResponse();
+                if (response != 350)
+                    throw new Exception(responseStr);
+                file.Seek(file.Length, SeekOrigin.Begin);
+                bytes_total = file.Length;
+            }
+            else
+            {
+                try
+                {
+                    file = new FileStream(local_filename, FileMode.Create);
+                }
+                catch (Exception ex)
+                {
+                    file = null;
+                    throw new Exception(ex.Message);
+                }
+            }
+
+            OpenDataSocket();
+            SendCommand("RETR " + remote_filename);
+            ReadResponse();
+
+            switch (response)
+            {
+                case 125:
+                case 150:
+                    break;
+                default:
+                    file.Close();
+                    file = null;
+                    errormessage += responseStr;
+                    return;
+            }
+            ConnectDataSocket();
+
+            return;
+        }
+
+        /// <summary>
+        /// ÉÏ´«ÎÄ¼ş(Ñ­»·µ÷ÓÃÖ±µ½ÉÏ´«Íê±Ï)
+        /// </summary>
+        /// <returns>·¢ËÍµÄ×Ö½ÚÊı</returns>
+        public long DoUpload()
+        {
+            Byte[] bytes = new Byte[512];
+            long bytes_got;
+
+            try
+            {
+                bytes_got = file.Read(bytes, 0, bytes.Length);
+                bytes_total += bytes_got;
+                data_sock.Send(bytes, (int)bytes_got, 0);
+
+                if (bytes_got <= 0)
+                {
+                    //ÉÏ´«Íê±Ï»òÓĞ´íÎó·¢Éú
+                    file.Close();
+                    file = null;
+
+                    CloseDataSocket();
+                    ReadResponse();
+                    switch (response)
+                    {
+                        case 226:
+                        case 250:
+                            break;
+                        default: //µ±ÉÏ´«ÖĞ¶ÏÊ±
+                            {
+                                errormessage += responseStr;
+                                loginfo.WriteLine(errormessage);
+                                //throw new Exception(responseStr);
+                                return -1;
+                            }
+                    }
+
+                    SetBinaryMode(false);
+                }
+            }
+            catch (Exception ex)
+            {
+                file.Close();
+                file = null;
+                CloseDataSocket();
+                ReadResponse();
+                //SetBinaryMode(false);
+                //throw ex;
+                //µ±ÉÏ´«ÖĞ¶ÏÊ±
+                errormessage += ex.Message;
+                loginfo.WriteLine(errormessage);
+                //throw new Exception(responseStr);
+                return -1;
+            }
+
+            return bytes_got;
+        }
+
+        /// <summary>
+        /// ÏÂÔØÎÄ¼ş(Ñ­»·µ÷ÓÃÖ±µ½ÏÂÔØÍê±Ï)
+        /// </summary>
+        /// <returns>½ÓÊÕµ½µÄ×Ö½Úµã</returns>
+        public long DoDownload()
+        {
+            Byte[] bytes = new Byte[512];
+            long bytes_got;
+
+            try
+            {
+                bytes_got = data_sock.Receive(bytes, bytes.Length, 0);
+
+                if (bytes_got <= 0)
+                {
+                    //ÏÂÔØÍê±Ï»òÓĞ´íÎó·¢Éú
+                    CloseDataSocket();
+                    file.Close();
+                    file = null;
+
+                    ReadResponse();
+                    switch (response)
+                    {
+                        case 226:
+                        case 250:
+                            break;
+                        default:
+                            {
+                                errormessage += responseStr;
+                                return -1;
+                            }
+                    }
+
+                    SetBinaryMode(false);
+
+                    return bytes_got;
+                }
+
+                file.Write(bytes, 0, (int)bytes_got);
+                bytes_total += bytes_got;
+            }
+            catch (Exception ex)
+            {
+                CloseDataSocket();
+                file.Close();
+                file = null;
+                ReadResponse();
+                SetBinaryMode(false);
+                //throw ex;
+                //µ±ÏÂÔØÖĞ¶ÏÊ±
+                errormessage += ex.Message;
+                return -1;
+            }
+
+            return bytes_got;
+        }
+       
+
+        public bool Put(String filePath)
+        {
+            
+            //Connect();
+           
+            OpenDataSocket();
+            SetBinaryMode(true);
+            
+            ChangeDir(strRemotePath);
+
+            bytes_total = 0;
+
+            try
+            {
+                file = new FileStream(filePath, FileMode.Open);
+            }
+            catch (Exception ex)
+            {
+                file = null;
+                errormessage += ex.Message;
+                return false;
+            }
+
+            file_size = file.Length;
+
+
+            SendCommand("STOR " + Path.GetFileName(filePath));
+            ReadResponse();
+
+            switch (response)
+            {
+                case 125:
+                case 150:
+                    break;
+                default:
+                    file.Close();
+                    file = null;
+                    errormessage += responseStr;
+                    return false;
+            }
+            ConnectDataSocket();
+            //////////////////////////////////////////////////////////////////////////
+            while (DoUpload() > 0)
+            {
+                int perc = (int)(((BytesTotal) * 100) / FileSize);
+                loginfo.WriteLine("Send " + perc.ToString() + "%");
+               
+            }
+            Disconnect();
+            //////////////////////////////////////////////////////////////////////////
+            return true;
+           
+        }
+        #endregion
     }
 }
+
+//¼òµ¥Ê¹ÓÃÊ¾Àı£º
+
+//³ÌĞò´úÂë ³ÌĞò´úÂë
+//FTP ftp = new FTPClientPort("127.0.0.1", "abc", "123456");
+
+////½¨Á¢ÎÄ¼ş¼Ğ
+//ftp.MakeDir("com");
+//ftp.ChangeDir("com");
+//ftp.MakeDir("mzwu");
+//ftp.ChangeDir("mzwu");
+
+////ÎÄ¼ş¼ĞÁĞ±í
+//ArrayList list = ftp.ListDirectories();
+//for (int i = 0; i < list.Count; i++)
+//{
+//    Response.Write(list[i].ToString() + "<br/>");
+//}
+
+////É¾³ıÎÄ¼ş¼Ğ(²»ÄÜÖ±½ÓÉ¾³ı·Ç¿ÕÎÄ¼ş¼Ğ)
+//ftp.RemoveDir("com\\mzwu");
+
+////ÉÏ´«ÎÄ¼ş
+//ftp.Connect();
+//ftp.OpenUpload(@"F:\mzwucom.jpg", Path.GetFileName(@"F:\mzwucom.jpg"));
+//while (ftp.DoUpload() > 0)
+//{
+//    int perc = (int)(((ftp.BytesTotal) * 100) / ftp.FileSize);
+//    Response.Write(perc.ToString() + "%<br/>");
+//    Response.Flush();
+//}
+//ftp.Disconnect();
+
+////ÏÂÔØÎÄ¼ş
+//ftp.Connect();
+//ftp.OpenDownload("mzwucom.jpg", @"E:\mzwucom.jpg");
+//while (ftp.DoDownload() > 0)
+//{
+//    int perc = (int)(((ftp.BytesTotal) * 100) / ftp.FileSize);
+//    Response.Write(perc.ToString() + "%<br/>");
+//    Response.Flush();
+//}
+//ftp.Disconnect();
+
+////ÎÄ¼şÁĞ±í
+//ArrayList list = ftp.ListFiles();
+//for (int i = 0; i < list.Count; i++)
+//{
+//    Response.Write(list[i].ToString() + "<br/>");
+//}
+
+////ÎÄ¼şÖØÃüÃû
+//ftp.RenameFile("mzwucom.jpg", "test.jpg");
+
+////É¾³ıÎÄ¼ş
+//ftp.RemoveFile("test.jpg");
+
+////ÏÔÊ¾´íÎóĞÅÏ¢
+//Response.Write(ftp.errormessage);

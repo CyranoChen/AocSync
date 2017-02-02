@@ -67,6 +67,7 @@
             this.tbFTPIP3 = new AOCSync.ControlPanel.NumberTextBox();
             this.tbFTPIP2 = new AOCSync.ControlPanel.NumberTextBox();
             this.tbFTPIP1 = new AOCSync.ControlPanel.NumberTextBox();
+            this.CKEnable = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // label8
@@ -98,13 +99,13 @@
             // 
             // listViewExportColumns
             // 
-            this.listViewExportColumns.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.listViewExportColumns.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.listViewExportColumns.CheckBoxes = true;
-            this.listViewExportColumns.Location = new System.Drawing.Point(9, 174);
+            this.listViewExportColumns.Location = new System.Drawing.Point(9, 194);
             this.listViewExportColumns.Name = "listViewExportColumns";
-            this.listViewExportColumns.Size = new System.Drawing.Size(567, 336);
+            this.listViewExportColumns.Size = new System.Drawing.Size(567, 316);
             this.listViewExportColumns.TabIndex = 60;
             this.listViewExportColumns.UseCompatibleStateImageBehavior = false;
             this.listViewExportColumns.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.listViewExportColumns_ItemChecked);
@@ -438,11 +439,24 @@
             this.tbFTPIP1.Size = new System.Drawing.Size(27, 21);
             this.tbFTPIP1.TabIndex = 21;
             // 
+            // CKEnable
+            // 
+            this.CKEnable.AutoSize = true;
+            this.CKEnable.Checked = true;
+            this.CKEnable.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.CKEnable.Location = new System.Drawing.Point(9, 172);
+            this.CKEnable.Name = "CKEnable";
+            this.CKEnable.Size = new System.Drawing.Size(72, 16);
+            this.CKEnable.TabIndex = 97;
+            this.CKEnable.Text = "IsEnable";
+            this.CKEnable.UseVisualStyleBackColor = true;
+            // 
             // AOCUserDetailForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(584, 541);
+            this.Controls.Add(this.CKEnable);
             this.Controls.Add(this.label11);
             this.Controls.Add(this.lblFTPRemoteDir);
             this.Controls.Add(this.lblFTPMode);
@@ -531,5 +545,6 @@
         private System.Windows.Forms.Label lblFTPMode;
         private System.Windows.Forms.Label lblFTPRemoteDir;
         private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.CheckBox CKEnable;
     }
 }

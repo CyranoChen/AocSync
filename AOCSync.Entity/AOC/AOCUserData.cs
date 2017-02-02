@@ -34,6 +34,7 @@ namespace AOCSync.Entity
                 FlightNature = dr["FlightNature"].ToString();
                 loginfo = new LogInfo(UserName+".log"); 
                 FTPPort=dr["FTPPort"].ToString();
+                IsEnable = (bool)dr["IsEnable"];
             }
             else
             {
@@ -53,22 +54,22 @@ namespace AOCSync.Entity
 
         public void Update()
         {
-            DataAccess.User.UpdateUser(UserID, UserName, UserPassword, FTPIP, FTPPort, FTPLogName, FTPPassword, FTPRemoteDir, FTPMode, IsPack, ITVTime, AirportIATA, FlightNature, ExportColumns);
+            DataAccess.User.UpdateUser(UserID, UserName, UserPassword, FTPIP, FTPPort, FTPLogName, FTPPassword, FTPRemoteDir, FTPMode, IsPack, ITVTime, AirportIATA, FlightNature, ExportColumns,IsEnable);
         }
 
         public void Update(SqlTransaction trans)
         {
-            DataAccess.User.UpdateUser(UserID, UserName, UserPassword, FTPIP, FTPPort, FTPLogName, FTPPassword, FTPRemoteDir, FTPMode, IsPack, ITVTime, AirportIATA, FlightNature, ExportColumns, trans);
+            DataAccess.User.UpdateUser(UserID, UserName, UserPassword, FTPIP, FTPPort, FTPLogName, FTPPassword, FTPRemoteDir, FTPMode, IsPack, ITVTime, AirportIATA, FlightNature, ExportColumns,IsEnable, trans);
         }
 
         public void Insert()
         {
-            DataAccess.User.InsertUser(UserName, UserPassword, FTPIP, FTPPort, FTPLogName, FTPPassword, FTPRemoteDir, FTPMode, IsPack, ITVTime, AirportIATA, FlightNature, ExportColumns);
+            DataAccess.User.InsertUser(UserName, UserPassword, FTPIP, FTPPort, FTPLogName, FTPPassword, FTPRemoteDir, FTPMode, IsPack, ITVTime, AirportIATA, FlightNature, ExportColumns,IsEnable);
         }
 
         public void Insert(SqlTransaction trans)
         {
-            DataAccess.User.InsertUser(UserName, UserPassword, FTPIP, FTPPort, FTPLogName, FTPPassword, FTPRemoteDir, FTPMode, IsPack, ITVTime, AirportIATA, FlightNature, ExportColumns, trans);
+            DataAccess.User.InsertUser(UserName, UserPassword, FTPIP, FTPPort, FTPLogName, FTPPassword, FTPRemoteDir, FTPMode, IsPack, ITVTime, AirportIATA, FlightNature, ExportColumns,IsEnable, trans);
         }
 
         public void Delete()
@@ -84,6 +85,21 @@ namespace AOCSync.Entity
         public static List<AOCUserData> GetAOCUserDatas()
         {
             DataTable dt = DataAccess.User.GetUsers();
+            List<AOCUserData> list = new List<AOCUserData>();
+
+            if (dt != null)
+            {
+                foreach (DataRow dr in dt.Rows)
+                {
+                    list.Add(new AOCUserData(dr));
+                }
+            }
+
+            return list;
+        }
+        public static List<AOCUserData> GetAOCUserDatasAll()
+        {
+            DataTable dt = DataAccess.User.GetUsersAll();
             List<AOCUserData> list = new List<AOCUserData>();
 
             if (dt != null)
@@ -137,7 +153,13 @@ namespace AOCSync.Entity
         private int iTVTime;
         private int airportIATA;
         private string flightNature;
-       
+        private bool isEnable;
+
+        public bool IsEnable
+        {
+            get { return isEnable; }
+            set { isEnable = value; }
+        }
 
      
         public int UserID

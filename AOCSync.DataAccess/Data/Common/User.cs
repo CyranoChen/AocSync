@@ -9,7 +9,7 @@ namespace AOCSync.DataAccess
     {
         public static DataRow GetUserByID(int userID)
         {
-            string sql = "SELECT ID, UserName, UserPassword, FTPIP, FTPPort, FTPLogName, FTPPassword, FTPRemoteDir, FTPMode, ExportColumns, IsPack, ITVTime, AirportIATA, FlightNature FROM [AOC_User] WHERE ID = @logID";
+            string sql = "SELECT ID, UserName, UserPassword, FTPIP, FTPPort, FTPLogName, FTPPassword, FTPRemoteDir, FTPMode, ExportColumns, IsPack, ITVTime, AirportIATA, FlightNature,IsEnable FROM [AOC_User] WHERE ID = @logID";
 
             DataSet ds = SqlHelper.ExecuteDataset(ConnectStringMsSql.GetConnection(), CommandType.Text, sql, new SqlParameter("@logID", userID));
 
@@ -23,10 +23,10 @@ namespace AOCSync.DataAccess
             }
         }
 
-        public static void UpdateUser(int userID, string userName, string userPassword, string ftpIP, string ftpPort, string ftpLogName, string ftpPassword, string ftpRemoteDir, string ftpMode, string isPack, int itvTime, int airportIATA, string flightNature, string exportColumns)
+        public static void UpdateUser(int userID, string userName, string userPassword, string ftpIP, string ftpPort, string ftpLogName, string ftpPassword, string ftpRemoteDir, string ftpMode, string isPack, int itvTime, int airportIATA, string flightNature, string exportColumns,bool isEnable)
         {
             string sql = @"UPDATE [AOC_User] SET UserName = @userName, UserPassword = @userPassword, FTPIP=@ftpIP, FTPPort=@ftpPort, FTPLogName = @ftpLogName, FTPPassword = @ftpPassword, FTPRemoteDir = @ftpRemoteDir, FTPMode = @ftpMode,
-                                ExportColumns = @exportColumns, IsPack=@isPack, ITVTime=@itvTime, AirportIATA=@airportIATA, FlightNature=@flightNature WHERE ID = @userID";
+                                ExportColumns = @exportColumns, IsPack=@isPack, ITVTime=@itvTime, AirportIATA=@airportIATA, FlightNature=@flightNature,IsEnable=@isEnable WHERE ID = @userID";
 
             SqlParameter[] para = { new SqlParameter("@userName", userName), 
                                     new SqlParameter("@userPassword", userPassword), 
@@ -40,16 +40,17 @@ namespace AOCSync.DataAccess
                                     new SqlParameter("@isPack", isPack), 
                                     new SqlParameter("@iTVTime", itvTime), 
                                     new SqlParameter("@airportIATA", airportIATA), 
-                                    new SqlParameter("@flightNature", flightNature), 
+                                    new SqlParameter("@flightNature", flightNature),
+                                    new SqlParameter("@isEnable", isEnable),
                                     new SqlParameter("@userID", userID) };
 
             SqlHelper.ExecuteNonQuery(ConnectStringMsSql.GetConnection(), CommandType.Text, sql, para);
         }
 
-        public static void UpdateUser(int userID, string userName, string userPassword, string ftpIP, string ftpPort, string ftpLogName, string ftpPassword, string ftpRemoteDir, string ftpMode, string isPack, int itvTime, int airportIATA, string flightNature, string exportColumns, SqlTransaction trans)
+        public static void UpdateUser(int userID, string userName, string userPassword, string ftpIP, string ftpPort, string ftpLogName, string ftpPassword, string ftpRemoteDir, string ftpMode, string isPack, int itvTime, int airportIATA, string flightNature, string exportColumns,bool isEnable, SqlTransaction trans)
         {
             string sql = @"UPDATE [AOC_User] SET UserName = @userName, UserPassword = @userPassword, FTPIP=@ftpIP, FTPPort=@ftpPort, FTPLogName = @ftpLogName, FTPPassword = @ftpPassword, FTPRemoteDir = @ftpRemoteDir, FTPMode = @ftpMode, 
-                               ExportColumns = @exportColumns, IsPack=@isPack, ITVTime=@itvTime, AirportIATA=@airportIATA, FlightNature=@flightNature WHERE ID = @userID";
+                               ExportColumns = @exportColumns, IsPack=@isPack, ITVTime=@itvTime, AirportIATA=@airportIATA, FlightNature=@flightNature,IsEnable=@isEnable WHERE ID = @userID";
 
             SqlParameter[] para = { new SqlParameter("@userName", userName), 
                                     new SqlParameter("@userPassword", userPassword), 
@@ -64,6 +65,7 @@ namespace AOCSync.DataAccess
                                     new SqlParameter("@iTVTime", itvTime), 
                                     new SqlParameter("@airportIATA", airportIATA), 
                                     new SqlParameter("@flightNature", flightNature), 
+                                     new SqlParameter("@isEnable", isEnable), 
                                     new SqlParameter("@userID", userID) };
 
             if (trans != null)
@@ -76,10 +78,10 @@ namespace AOCSync.DataAccess
             }
         }
 
-        public static void InsertUser(string userName, string userPassword, string ftpIP, string ftpPort, string ftpLogName, string ftpPassword, string ftpRemoteDir, string ftpMode, string isPack, int itvTime, int airportIATA, string flightNature, string exportColumns)
+        public static void InsertUser(string userName, string userPassword, string ftpIP, string ftpPort, string ftpLogName, string ftpPassword, string ftpRemoteDir, string ftpMode, string isPack, int itvTime, int airportIATA, string flightNature, string exportColumns,bool isEnable)
         {
-            string sql = @"INSERT INTO [AOC_User] (UserName, UserPassword, FTPIP, FTPPort, FTPLogName, FTPPassword, FTPRemoteDir, FTPMode, IsPack, ITVTime, AirportIATA, FlightNature, ExportColumns) VALUES 
-                                (@userName, @userPassword, @ftpIP, @ftpPort, @ftpLogName, @ftpPassword, @ftpRemoteDir, @ftpMode,  @isPack, @itvTime, @airportIATA, @flightNature, @exportColumns)";
+            string sql = @"INSERT INTO [AOC_User] (UserName, UserPassword, FTPIP, FTPPort, FTPLogName, FTPPassword, FTPRemoteDir, FTPMode, IsPack, ITVTime, AirportIATA, FlightNature, ExportColumns,IsEnable) VALUES 
+                                (@userName, @userPassword, @ftpIP, @ftpPort, @ftpLogName, @ftpPassword, @ftpRemoteDir, @ftpMode,  @isPack, @itvTime, @airportIATA, @flightNature, @exportColumns,@isEnable)";
 
             SqlParameter[] para = { new SqlParameter("@userName", userName), 
                                     new SqlParameter("@userPassword", userPassword), 
@@ -93,15 +95,16 @@ namespace AOCSync.DataAccess
                                     new SqlParameter("@itvTime", itvTime), 
                                     new SqlParameter("@airportIATA", airportIATA), 
                                     new SqlParameter("@flightNature", flightNature), 
+                                     new SqlParameter("@isEnable",isEnable), 
                                     new SqlParameter("@exportColumns", exportColumns) };
 
             SqlHelper.ExecuteNonQuery(ConnectStringMsSql.GetConnection(), CommandType.Text, sql, para);
         }
 
-        public static void InsertUser(string userName, string userPassword, string ftpIP, string ftpPort, string ftpLogName, string ftpPassword, string ftpRemoteDir, string ftpMode, string isPack, int itvTime, int airportIATA, string flightNature, string exportColumns, SqlTransaction trans)
+        public static void InsertUser(string userName, string userPassword, string ftpIP, string ftpPort, string ftpLogName, string ftpPassword, string ftpRemoteDir, string ftpMode, string isPack, int itvTime, int airportIATA, string flightNature, string exportColumns,bool isEnable, SqlTransaction trans)
         {
-            string sql = @"INSERT INTO [AOC_User] (UserName, UserPassword, FTPIP, FTPPort, FTPLogName, FTPPassword, FTPRemoteDir, FTPMode, IsPack, ITVTime, AirportIATA, FlightNature, ExportColumns) VALUES 
-                                (@userName, @userPassword, @ftpIP, @ftpPort, @ftpLogName, @ftpPassword, @ftpRemoteDir, @ftpMode,  @isPack, @itvTime, @airportIATA, @flightNature, @exportColumns)";
+            string sql = @"INSERT INTO [AOC_User] (UserName, UserPassword, FTPIP, FTPPort, FTPLogName, FTPPassword, FTPRemoteDir, FTPMode, IsPack, ITVTime, AirportIATA, FlightNature, ExportColumns,IsEnable) VALUES 
+                                (@userName, @userPassword, @ftpIP, @ftpPort, @ftpLogName, @ftpPassword, @ftpRemoteDir, @ftpMode,  @isPack, @itvTime, @airportIATA, @flightNature, @exportColumns,@isEnable)";
 
             SqlParameter[] para = { new SqlParameter("@userName", userName), 
                                     new SqlParameter("@userPassword", userPassword), 
@@ -114,7 +117,8 @@ namespace AOCSync.DataAccess
                                     new SqlParameter("@isPack", isPack), 
                                     new SqlParameter("@itvTime", itvTime), 
                                     new SqlParameter("@airportIATA", airportIATA), 
-                                    new SqlParameter("@flightNature", flightNature), 
+                                    new SqlParameter("@flightNature", flightNature),
+                                    new SqlParameter("@isEnable", isEnable),
                                     new SqlParameter("@exportColumns", exportColumns) };
 
             if (trans != null)
@@ -154,7 +158,22 @@ namespace AOCSync.DataAccess
 
         public static DataTable GetUsers()
         {
-            string sql = @"SELECT ID, UserName, UserPassword, FTPIP, FTPPort, FTPLogName, FTPPassword, FTPRemoteDir, FTPMode, IsPack, ITVTime, AirportIATA, FlightNature, ExportColumns FROM [AOC_User] ORDER BY ID";
+            string sql = @"SELECT ID, UserName, UserPassword, FTPIP, FTPPort, FTPLogName, FTPPassword, FTPRemoteDir, FTPMode, IsPack, ITVTime, AirportIATA, FlightNature, ExportColumns,IsEnable FROM [AOC_User] WHERE IsEnable = 1 ORDER BY ID";
+
+            DataSet ds = SqlHelper.ExecuteDataset(ConnectStringMsSql.GetConnection(), CommandType.Text, sql);
+
+            if (ds.Tables[0].Rows.Count == 0)
+            {
+                return null;
+            }
+            else
+            {
+                return ds.Tables[0];
+            }
+        }
+        public static DataTable GetUsersAll()
+        {
+            string sql = @"SELECT ID, UserName, UserPassword, FTPIP, FTPPort, FTPLogName, FTPPassword, FTPRemoteDir, FTPMode, IsPack, ITVTime, AirportIATA, FlightNature, ExportColumns,IsEnable FROM [AOC_User]  ORDER BY ID";
 
             DataSet ds = SqlHelper.ExecuteDataset(ConnectStringMsSql.GetConnection(), CommandType.Text, sql);
 

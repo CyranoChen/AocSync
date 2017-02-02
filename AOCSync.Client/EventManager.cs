@@ -29,7 +29,7 @@ namespace AOCSync.Client
 
 		public void Execute()
         {
-            DateTime dateTime = DateTime.Now;
+            DateTime dateTime = DateTime.Now;//Convert.ToDateTime("2016-09-09 10:00:05"); //DateTime.Now;
             foreach (Event myEvent in EventsList)
             {
                 if (myEvent != null)

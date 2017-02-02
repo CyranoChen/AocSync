@@ -66,6 +66,7 @@ namespace AOCSync.ControlPanel
             SetFlightNature();
             SetFTPPort();
             SetUserPassword();
+            SetIsEnable();
         }
 
         private void InitListView()
@@ -186,6 +187,7 @@ namespace AOCSync.ControlPanel
             _aocUserData.ITVTime = GetITVTime();
             _aocUserData.AirportIATA = GetAirportIATA();
             _aocUserData.FlightNature = GetFlightNature();
+            _aocUserData.IsEnable = GetIsEnable();
         }
 
         private void UpdateAOCUser()
@@ -360,6 +362,14 @@ namespace AOCSync.ControlPanel
         private string GetIsPack()
         {
             return cbPackSelect.Checked.ToString();
+        }
+        private void SetIsEnable()
+        {
+            CKEnable.Checked = _aocUserData.IsEnable;
+        }
+        private bool GetIsEnable()
+        {
+            return CKEnable.Checked;
         }
 
         private int GetITVTime()

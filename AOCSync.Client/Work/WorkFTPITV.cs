@@ -18,7 +18,7 @@ namespace AOCSync.Client
             {
                 //AOCUserData aocUserData = new AOCUserData();
                 dateTime = (DateTime)state;
-                //DateTime dateTime = DateTime.Parse("2013-07-21");
+                //dateTime = DateTime.Parse("2017-01-10"+" " +DateTime.Now.ToString("hh:mm:ss"));
 
                 //Modify to Implement Interface by AocUser Configuration
                 AOCUserData user=AOCUserData.Cache.Load(this.UserID);

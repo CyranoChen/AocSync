@@ -1,5 +1,12 @@
+C:\Users\lufeng\Desktop\AOC20150317\AOC\AOCSync.DataAccess\bin\Debug\AocSync.DataAccess.dll
+C:\Users\lufeng\Desktop\AOC20150317\AOC\AOCSync.DataAccess\bin\Debug\AocSync.DataAccess.pdb
+C:\Users\lufeng\Desktop\AOC20150317\AOC\AOCSync.DataAccess\obj\Debug\AocSync.DataAccess.dll
+C:\Users\lufeng\Desktop\AOC20150317\AOC\AOCSync.DataAccess\obj\Debug\AocSync.DataAccess.pdb
+E:\AOC20150317\AOC\AOCSync.DataAccess\bin\Debug\AocSync.DataAccess.dll
+E:\AOC20150317\AOC\AOCSync.DataAccess\bin\Debug\AocSync.DataAccess.pdb
+E:\AOC20150317\AOC\AOCSync.DataAccess\obj\Debug\AocSync.DataAccess.dll
+E:\AOC20150317\AOC\AOCSync.DataAccess\obj\Debug\AocSync.DataAccess.pdb
 C:\Projects\AOCSync\AOCSync.DataAccess\bin\Debug\AocSync.DataAccess.dll
 C:\Projects\AOCSync\AOCSync.DataAccess\bin\Debug\AocSync.DataAccess.pdb
 C:\Projects\AOCSync\AOCSync.DataAccess\obj\Debug\AocSync.DataAccess.dll
 C:\Projects\AOCSync\AOCSync.DataAccess\obj\Debug\AocSync.DataAccess.pdb
-C:\Projects\AOCSync\AOCSync.DataAccess\obj\Debug\AOCSync.DataAccess.csprojResolveAssemblyReference.cache
