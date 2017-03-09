@@ -15,7 +15,7 @@ namespace AOCSync.DataAccess
             string sql = @"select 
                         substr(FLIGHT_DIRECTION,0,1) as DRCT,
                         FLIGHT_IDENTITY as FLT,
-                        FLIGHT_STATUS_CODE as OPERATIONTYPE_CODE1,
+                        OPERATION_TYPE_CODE_P as OPERATIONTYPE_CODE1,
                         to_char(to_date(SCHEDULED_DATE_TIME,'yyyy-mm-dd,hh24:mi:ss'), 'yyyymmddhh24miss') as STOD,
                         flight_nature_code as TTYP, 
                         to_char(to_date(WHEELS_DOWN_DATE_TIME,'yyyy-mm-dd,hh24:mi:ss'), 'yyyymmddhh24miss') as LAND,
@@ -111,7 +111,7 @@ namespace AOCSync.DataAccess
             string sql = @"select 
                         substr(FLIGHT_DIRECTION,0,1) as DRCT,
                         FLIGHT_IDENTITY as FLT,
-                        FLIGHT_STATUS_CODE as OPERATIONTYPE_CODE1,
+                        OPERATION_TYPE_CODE_P as OPERATIONTYPE_CODE1,
                         to_char(to_date(SCHEDULED_DATE_TIME,'yyyy-mm-dd,hh24:mi:ss'), 'yyyymmddhh24miss') as STOD,
                         flight_nature_code as TTYP, 
                         to_char(to_date(WHEELS_DOWN_DATE_TIME,'yyyy-mm-dd,hh24:mi:ss'), 'yyyymmddhh24miss') as LAND,
@@ -205,7 +205,7 @@ namespace AOCSync.DataAccess
             string sql = @"select 
                         substr(FLIGHT_DIRECTION,0,1) as DRCT,
                         FLIGHT_IDENTITY as FLT,
-                        FLIGHT_STATUS_CODE as OPERATIONTYPE_CODE1,
+                        OPERATION_TYPE_CODE_P as OPERATIONTYPE_CODE1,
                         to_char(to_date(SCHEDULED_DATE_TIME,'yyyy-mm-dd,hh24:mi:ss'), 'yyyymmddhh24miss') as STOD,
                         flight_nature_code as TTYP, 
                         to_char(to_date(WHEELS_DOWN_DATE_TIME,'yyyy-mm-dd,hh24:mi:ss'), 'yyyymmddhh24miss') as LAND,
